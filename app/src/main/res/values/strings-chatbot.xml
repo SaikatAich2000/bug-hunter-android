@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sleuth_title">Sleuth</string>
+    <string name="sleuth_tagline">Your Bug Hunter assistant</string>
+    <string name="sleuth_online">Online</string>
+    <string name="sleuth_tab_chat">Chat</string>
+    <string name="sleuth_tab_history">History</string>
+    <string name="sleuth_tab_settings">Settings</string>
+    <string name="sleuth_input_placeholder">Ask Sleuth…</string>
+    <string name="sleuth_send">Send</string>
+    <string name="sleuth_close">Close</string>
+    <string name="sleuth_clear">Clear conversation</string>
+    <string name="sleuth_clear_all">Clear all sessions</string>
+    <string name="sleuth_open">Open Sleuth</string>
+    <string name="sleuth_history_empty">No conversations yet</string>
+    <string name="sleuth_history_empty_helper">Start chatting and your sessions will appear here.</string>
+    <string name="sleuth_setting_auto_open">Auto-open on first launch</string>
+    <string name="sleuth_setting_show_typing">Show typing indicator</string>
+</resources>

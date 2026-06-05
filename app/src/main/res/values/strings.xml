@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bug Hunter</string>
+    <string name="app_brand">Bug Hunter</string>
+    <string name="app_version_label">v2.8</string>
+
+    <string name="theme_mode_system">Match system</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+
+    <string name="loading">Working…</string>
+    <string name="generic_error">Something went wrong.</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="ok">OK</string>
+
+</resources>

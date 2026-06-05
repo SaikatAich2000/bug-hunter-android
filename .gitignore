@@ -1,0 +1,53 @@
+# --- Android / Gradle ---
+.gradle/
+build/
+**/build/
+local.properties
+.cxx/
+captures/
+*.apk
+*.aab
+*.aar
+*.dex
+*.ap_
+
+# --- Android Studio / IntelliJ ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.navigation/
+.externalNativeBuild/
+
+# --- Kotlin / KSP ---
+kotlin-js-store/
+.kotlin/
+
+# --- Test output ---
+**/test-results/
+**/build/test-results/
+**/build/reports/
+*.exec
+
+# --- macOS / Windows / Linux noise ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# --- Editors ---
+.vscode/
+.fleet/
+
+# --- Local secrets ---
+# Carried over from the backend reference: never commit a real .env.
+.env
+.env.local
+.env.*.local
+
+# --- AI assistant / agent scratch ---
+.claude/
+.aider*
+.cursor/
+.continue/
+
