@@ -38,7 +38,7 @@ Single `:app` module. Detailed architecture lives under [`_design/`](_design).
 git clone https://github.com/YOUR_USERNAME/bug-hunter-android.git
 cd bug-hunter-android
 
-# 2. Point at your Bug Hunter backend
+# 2. Point at your Bug Hunter backend (default: https://www.bughunter.co.in)
 #    Edit gradle.properties → bh.baseUrl=https://your-backend.example.com
 
 # 3. Open in Android Studio (Koala or newer) → Run ▶

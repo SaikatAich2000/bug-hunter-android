@@ -22,7 +22,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        val baseUrl = (project.findProperty("bh.baseUrl") as String?) ?: "https://bh.example.com"
+        val baseUrl = (project.findProperty("bh.baseUrl") as String?) ?: "https://www.bughunter.co.in"
         buildConfigField("String", "DEFAULT_BASE_URL", "\"$baseUrl\"")
     }
 

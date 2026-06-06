@@ -12,10 +12,10 @@ Three deploy paths, plus an optional wireless one.
 
 ## 1. Point the app at your backend
 
-Edit `gradle.properties`:
+Edit `gradle.properties` (defaults to the official `https://www.bughunter.co.in`; replace if you self-host):
 
 ```properties
-bh.baseUrl=https://your-bug-hunter-backend.example.com
+bh.baseUrl=https://www.bughunter.co.in
 ```
 
 Re-sync in Android Studio (🐘 icon → Sync Now).
