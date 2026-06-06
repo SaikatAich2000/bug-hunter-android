@@ -3,8 +3,8 @@
 Native Android client for **Bug Hunter** — a multi-tenant bug, requirement, and task tracker. Talks to a [Bug Hunter backend](https://github.com/) over HTTPS.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
-![minSdk 26](https://img.shields.io/badge/minSdk-26-brightgreen)
-![targetSdk 35](https://img.shields.io/badge/targetSdk-35-blue)
+![minSdk 29](https://img.shields.io/badge/minSdk-29-brightgreen)
+![targetSdk 36](https://img.shields.io/badge/targetSdk-36-blue)
 ![Kotlin 2.0](https://img.shields.io/badge/Kotlin-2.0.20-7F52FF)
 
 ## Features

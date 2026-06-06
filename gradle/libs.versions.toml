@@ -1,6 +1,8 @@
 [versions]
 # Build
-agp = "8.5.2"
+# AGP 8.7+ is required for compileSdk 36 (Android 16). Pinned to 8.7.3 for
+# stability; bump to 8.8+ if you need Android 17 preview APIs.
+agp = "8.7.3"
 kotlin = "2.0.20"
 ksp = "2.0.20-1.0.25"
 

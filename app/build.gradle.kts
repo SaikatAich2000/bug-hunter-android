@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.bughunter"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.bughunter"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = 29
+        targetSdk = 36
         versionCode = 28000
         versionName = "2.8.0"
 

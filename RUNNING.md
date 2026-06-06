@@ -76,7 +76,7 @@ Then deploy normally (Path A or B). Pairing is one-time; connect once per Wi-Fi 
 
 | Symptom | Fix |
 |---|---|
-| Gradle sync fails on `compileSdk 35` | SDK Manager → install **Android 15 (API 35)**. |
+| Gradle sync fails on `compileSdk 36` | SDK Manager → install **Android 16 (API 36)**. |
 | `./gradlew` not found | Run `gradle wrapper --gradle-version 8.10.2` once, or open the project in Android Studio (it bootstraps). |
 | Phone shows as `unauthorized` in `adb devices` | Unplug + replug, accept the trust prompt, tap **Always allow**. |
 | Phone not in device dropdown | Pull down notification shade on phone → USB notification → switch to **File transfer** mode. Use a data cable, not charge-only. |
