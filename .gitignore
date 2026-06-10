@@ -58,3 +58,13 @@ google-services.json
 .cursor/
 .continue/
 
+# --- Generated API artifacts ---
+# Produced by scripts/gen-android-api-docs.py from the Retrofit
+# interfaces under app/src/main/java/com/bughunter/core/network/api/.
+# The Retrofit sources + the enterprise OpenAPI spec are the source of
+# truth; these files are derivable from them. Regenerate locally with:
+#     python scripts/gen-android-api-docs.py
+docs/api/openapi.json
+docs/api/openapi.yaml
+docs/api/Bug-Hunter-Android.postman_collection.json
+docs/api/android-api-usage.md
