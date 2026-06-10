@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Lock
@@ -16,23 +17,33 @@ import androidx.compose.material.icons.outlined.Phonelink
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bughunter.core.data.local.AppPrefs
 import com.bughunter.core.ui.components.BhCard
 import com.bughunter.core.ui.components.BhDangerButton
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhFilterChip
 import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhSectionHeader
 import com.bughunter.core.ui.components.BhTextField
+import com.bughunter.core.ui.theme.BhModalShape
 import com.bughunter.core.ui.theme.LocalBrandTokens
 
 @Composable
@@ -43,12 +54,27 @@ internal fun SettingsScreen(
     onTwoFactor: () -> Unit,
     onMySessions: () -> Unit,
     onLogout: () -> Unit,
+    onAccountDeleted: () -> Unit = onLogout,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     viewModel.setIsDebug(isDebug)
     val state by viewModel.state.collectAsState()
+    val deleteState by viewModel.deleteState.collectAsState()
+
+    // Successful deletion is a terminal signal: the AuthRepository has
+    // already cleared the local session in its delete-account success
+    // path, so we navigate to login (or wherever the host handles the
+    // "logged out" state).
+    LaunchedEffect(deleteState.isDeleted) {
+        if (deleteState.isDeleted) {
+            viewModel.resetDeleteState()
+            onAccountDeleted()
+        }
+    }
+
     SettingsContent(
         state = state,
+        deleteState = deleteState,
         onThemeModeChange = viewModel::onThemeModeChange,
         onDefaultNewTypeChange = viewModel::onDefaultNewTypeChange,
         onBaseUrlChange = viewModel::onBaseUrlChange,
@@ -57,12 +83,16 @@ internal fun SettingsScreen(
         onTwoFactor = onTwoFactor,
         onMySessions = onMySessions,
         onLogout = onLogout,
+        onDeleteAccount = viewModel::deleteAccount,
+        onDismissDeleteError = viewModel::dismissDeleteError,
+        onResetDeleteState = viewModel::resetDeleteState,
     )
 }
 
 @Composable
 internal fun SettingsTestHarness(
     state: SettingsUiState,
+    deleteState: DeleteAccountUiState = DeleteAccountUiState(),
     onThemeModeChange: (AppPrefs.ThemeMode) -> Unit = {},
     onDefaultNewTypeChange: (String) -> Unit = {},
     onBaseUrlChange: (String) -> Unit = {},
@@ -71,9 +101,13 @@ internal fun SettingsTestHarness(
     onTwoFactor: () -> Unit = {},
     onMySessions: () -> Unit = {},
     onLogout: () -> Unit = {},
+    onDeleteAccount: (String) -> Unit = {},
+    onDismissDeleteError: () -> Unit = {},
+    onResetDeleteState: () -> Unit = {},
 ) {
     SettingsContent(
         state = state,
+        deleteState = deleteState,
         onThemeModeChange = onThemeModeChange,
         onDefaultNewTypeChange = onDefaultNewTypeChange,
         onBaseUrlChange = onBaseUrlChange,
@@ -82,12 +116,16 @@ internal fun SettingsTestHarness(
         onTwoFactor = onTwoFactor,
         onMySessions = onMySessions,
         onLogout = onLogout,
+        onDeleteAccount = onDeleteAccount,
+        onDismissDeleteError = onDismissDeleteError,
+        onResetDeleteState = onResetDeleteState,
     )
 }
 
 @Composable
 private fun SettingsContent(
     state: SettingsUiState,
+    deleteState: DeleteAccountUiState,
     onThemeModeChange: (AppPrefs.ThemeMode) -> Unit,
     onDefaultNewTypeChange: (String) -> Unit,
     onBaseUrlChange: (String) -> Unit,
@@ -96,7 +134,12 @@ private fun SettingsContent(
     onTwoFactor: () -> Unit,
     onMySessions: () -> Unit,
     onLogout: () -> Unit,
+    onDeleteAccount: (String) -> Unit,
+    onDismissDeleteError: () -> Unit,
+    onResetDeleteState: () -> Unit,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     val tokens = LocalBrandTokens.current
     Column(
         modifier = Modifier
@@ -197,11 +240,128 @@ private fun SettingsContent(
             onClick = onLogout,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Account deletion entry point. Google Play requires this be
+        // reachable in-app for any app that supports user accounts.
+        // Tapping opens a confirmation dialog (password re-auth) before
+        // calling DELETE /api/auth/account.
+        BhSectionHeader(text = "Danger zone")
+        BhCard {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Delete your account",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "Permanently removes your profile, sessions, and saved views. " +
+                        "Bugs you reported stay so your team isn't disrupted, but your " +
+                        "name on them is anonymised. This cannot be undone.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = tokens.textMuted,
+                )
+                BhDangerButton(
+                    text = "Delete account",
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+
         Text(
             text = "Bug Hunter for Android 2.9",
             style = MaterialTheme.typography.labelSmall,
             color = tokens.textFaint,
         )
+    }
+
+    if (showDeleteDialog) {
+        DeleteAccountDialog(
+            state = deleteState,
+            onConfirm = onDeleteAccount,
+            onDismiss = {
+                if (!deleteState.isSubmitting) {
+                    showDeleteDialog = false
+                    onResetDeleteState()
+                }
+            },
+            onDismissError = onDismissDeleteError,
+        )
+    }
+}
+
+@Composable
+private fun DeleteAccountDialog(
+    state: DeleteAccountUiState,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onDismissError: () -> Unit,
+) {
+    var password by remember { mutableStateOf("") }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = !state.isSubmitting,
+            dismissOnClickOutside = !state.isSubmitting,
+        ),
+    ) {
+        Surface(
+            shape = BhModalShape,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 4.dp,
+            modifier = Modifier
+                .widthIn(max = 480.dp)
+                .padding(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = "Delete your account?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "This is permanent. Enter your password to confirm.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                BhTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        if (state.error != null) onDismissError()
+                    },
+                    label = "Password",
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true,
+                    required = true,
+                )
+                BhErrorBanner(error = state.error)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    BhGhostButton(
+                        text = "Cancel",
+                        onClick = onDismiss,
+                        enabled = !state.isSubmitting,
+                    )
+                    BhDangerButton(
+                        text = if (state.isSubmitting) "Deleting..." else "Delete forever",
+                        onClick = { onConfirm(password) },
+                        enabled = password.isNotEmpty() && !state.isSubmitting,
+                    )
+                }
+            }
+        }
     }
 }
 

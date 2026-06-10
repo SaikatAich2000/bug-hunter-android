@@ -46,3 +46,17 @@
 # App DTOs (Moshi-generated adapters reflect on these)
 -keep class com.bughunter.core.network.dto.** { *; }
 -keep class com.bughunter.core.domain.model.** { *; }
+
+# WorkManager + Firebase: both load classes from string names at runtime
+# (WorkManager from a serialized class-name in its DB, Firebase from the
+# AndroidManifest service entry). R8 sees Worker subclasses only if it
+# can prove the class reference; the manifest analyzer catches services
+# but NOT the manifest-less Worker. Be explicit so push registration
+# can never silently break in a shrunk build.
+-keep class com.bughunter.core.push.** { *; }
+-keep class * extends androidx.work.ListenableWorker { *; }
+-keep class * extends com.google.firebase.messaging.FirebaseMessagingService { *; }
+
+# Hilt-Work: generated factory registers workers via class name.
+-keep class * extends androidx.hilt.work.HiltWorkerFactory { *; }
+-keep @androidx.hilt.work.HiltWorker class * { *; }
