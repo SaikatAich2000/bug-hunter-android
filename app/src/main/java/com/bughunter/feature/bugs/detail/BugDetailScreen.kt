@@ -31,6 +31,7 @@ import com.bughunter.core.network.DomainError
 import com.bughunter.core.network.dto.BugDetail
 import com.bughunter.core.network.dto.Role
 import com.bughunter.core.ui.components.BhBadge
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhIconButton
 import com.bughunter.core.ui.components.BhRichHtml
 import com.bughunter.core.ui.components.BhTopAppBar
@@ -206,6 +207,9 @@ private fun BugBodySection(
     val bug = model.bug
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         BhRichHtml(html = bug.description)
+        // Surface action errors (failed post / delete) right above the
+        // action area so users actually see why their tap did nothing.
+        BhErrorBanner(error = model.actionError)
         AttachmentsSection(
             attachments = bug.attachments,
             currentUserRole = currentUserRole,

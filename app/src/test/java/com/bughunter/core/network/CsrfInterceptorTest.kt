@@ -100,12 +100,48 @@ class CsrfInterceptorTest {
     }
 
     @Test
-    fun `skips silently when CSRF cookie absent`() {
-        server.enqueue(MockResponse().setResponseCode(403))
+    fun `cookie absent triggers inline api health seed then attaches header on retry`() {
+        // Cold-start path: no bh_csrf cookie in the jar. Interceptor must
+        // do a one-shot GET /api/health, read the Set-Cookie the backend
+        // returns, then attach X-CSRF-Token to the original POST. Without
+        // this safety net, the POST 403s and the user sees a phantom
+        // permission error.
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("""{"ok":true}""")
+                .addHeader("Set-Cookie", "bh_csrf=seed-from-health; Path=/"),
+        )
+        server.enqueue(MockResponse().setResponseCode(204))
+
         val req = Request.Builder().url(server.url("/api/bugs")).post("{}".toRequestBody()).build()
         client().newCall(req).execute().close()
-        val recorded = server.takeRequest()
-        assertThat(recorded.getHeader("X-CSRF-Token")).isNull()
+
+        assertThat(server.requestCount).isEqualTo(2)
+        val seed = server.takeRequest()
+        val post = server.takeRequest()
+        assertThat(seed.path).isEqualTo("/api/health")
+        assertThat(seed.method).isEqualTo("GET")
+        assertThat(post.path).isEqualTo("/api/bugs")
+        assertThat(post.getHeader("X-CSRF-Token")).isEqualTo("seed-from-health")
+    }
+
+    @Test
+    fun `cookie absent and seed fails to set cookie proceeds without header`() {
+        // If even the /api/health probe doesn't issue a cookie (server
+        // misconfig, network glitch), don't loop forever — proceed without
+        // the header and let the resulting 403 bubble up so AuthInterceptor
+        // (or the UI) can react.
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"ok":true}"""))
+        server.enqueue(MockResponse().setResponseCode(403))
+
+        val req = Request.Builder().url(server.url("/api/bugs")).post("{}".toRequestBody()).build()
+        client().newCall(req).execute().close()
+
+        assertThat(server.requestCount).isEqualTo(2)
+        server.takeRequest() // /api/health
+        val post = server.takeRequest()
+        assertThat(post.getHeader("X-CSRF-Token")).isNull()
     }
 
     @Test

@@ -28,12 +28,16 @@ import com.bughunter.core.network.dto.TotpConfirmIn
 import com.bughunter.core.network.dto.TotpConfirmOut
 import com.bughunter.core.network.dto.TotpDisableIn
 import com.bughunter.core.network.dto.TotpStatus
+import com.bughunter.core.push.PushScope
+import com.bughunter.core.push.PushTokenSync
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -57,6 +61,8 @@ internal class AuthRepository @Inject constructor(
     private val appPrefs: AppPrefs,
     private val cookieJar: EncryptedCookieJar,
     private val stateHolder: AuthStateHolder,
+    private val pushTokenSyncer: PushTokenSync,
+    @PushScope private val pushScope: CoroutineScope,
     moshi: Moshi,
 ) {
 
@@ -201,6 +207,12 @@ internal class AuthRepository @Inject constructor(
     }
 
     suspend fun clearLocalSession() {
+        // Fire the unregister BEFORE clearing local state so PushPrefs
+        // still has the cached token. WorkManager owns the actual
+        // server DELETE so this is just an enqueue — wrapping in
+        // pushScope.launch keeps any DataStore read/write path off the
+        // logout-clearing critical path.
+        pushScope.launch { runCatching { pushTokenSyncer.unregisterCurrent() } }
         cookieJar.clear()
         authPrefs.clear()
         appPrefs.setLastKnownOrgId(null)
@@ -214,6 +226,13 @@ internal class AuthRepository @Inject constructor(
         appPrefs.setLastKnownOrgId(me.orgId)
         _state.value = AuthState.Authenticated(me)
         stateHolder.setAuthenticated(me)
+        // Tell the server "this device belongs to user X now". Fire-and-
+        // forget on the app-lifetime push scope so a flaky FCM endpoint
+        // or unreachable backend never blocks the sign-in / sign-up
+        // coroutine. The syncer's underlying register goes through
+        // WorkManager, which already retries with backoff if the
+        // immediate POST fails.
+        pushScope.launch { runCatching { pushTokenSyncer.registerCurrent() } }
     }
 
     private fun handleLoginError(error: DomainError) {

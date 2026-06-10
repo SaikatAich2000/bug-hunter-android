@@ -9,6 +9,7 @@ import com.bughunter.core.network.api.BrandingApi
 import com.bughunter.core.network.api.BugsApi
 import com.bughunter.core.network.api.ChatApi
 import com.bughunter.core.network.api.CustomFieldsApi
+import com.bughunter.core.network.api.DevicesApi
 import com.bughunter.core.network.api.EventsApi
 import com.bughunter.core.network.api.InvitationsApi
 import com.bughunter.core.network.api.MembershipsApi
@@ -26,6 +27,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.ConnectionPool
 import okhttp3.CookieJar
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -75,14 +77,37 @@ internal object NetworkModule {
     ): OkHttpClient = OkHttpClient.Builder()
         .cookieJar(cookieJar)
         .addInterceptor(userAgentInterceptor)
-        .addInterceptor(csrfInterceptor)
+        // Auth must sit ABOVE Csrf. On a 403 "CSRF check failed", Auth
+        // reseeds the cookie and retries via chain.proceed(); that retry
+        // flows downstream and must hit CsrfInterceptor so the freshly-
+        // issued bh_csrf is read and attached as X-CSRF-Token. With the
+        // opposite order, the retry skips Csrf entirely and 403s again,
+        // surfacing as a phantom "permission" error to the user.
         .addInterceptor(authInterceptor)
+        .addInterceptor(csrfInterceptor)
         .addInterceptor(logging)
-        .connectTimeout(20, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .callTimeout(120, TimeUnit.SECONDS)
+        // Fail fast on a dead host — 8 s, not the OkHttp default 10 s.
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .callTimeout(45, TimeUnit.SECONDS)
+        // MUST stay true. Disabling it ALSO disables OkHttp's automatic
+        // recovery from stale pooled connections, which is the canonical
+        // fix for "unexpected end of stream" on the second request to a
+        // local dev backend: uvicorn's default keep-alive is 5 s, but
+        // OkHttp's pool holds idle connections for 5 minutes. Any tap
+        // after a brief pause reuses a socket the server already closed,
+        // and the first byte read produces EOFException. With retry=true,
+        // OkHttp transparently opens a fresh connection and resends.
+        //
+        // Past concern (40 s wait on multi-A-record hosts): mitigated by
+        // the explicit 8 s connectTimeout and 45 s callTimeout above.
         .retryOnConnectionFailure(true)
+        // Match the pool's idle keep-alive to a realistic server keep-
+        // alive window. uvicorn defaults to 5 s. Even with retry=true a
+        // shorter pool window means fewer doomed reuses to retry from in
+        // the first place — feels snappier on cold-tap interactions.
+        .connectionPool(ConnectionPool(maxIdleConnections = 5, keepAliveDuration = 4, timeUnit = TimeUnit.SECONDS))
         .build()
 
     @Provides
@@ -141,4 +166,7 @@ internal object NetworkModule {
         retrofit.create(WebhooksApi::class.java)
 
     @Provides @Singleton fun provideChatApi(retrofit: Retrofit): ChatApi = retrofit.create(ChatApi::class.java)
+
+    @Provides @Singleton fun provideDevicesApi(retrofit: Retrofit): DevicesApi =
+        retrofit.create(DevicesApi::class.java)
 }

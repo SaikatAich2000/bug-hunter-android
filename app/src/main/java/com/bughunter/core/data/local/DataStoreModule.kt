@@ -14,6 +14,7 @@ import javax.inject.Singleton
 
 @Qualifier annotation class AppPrefsStore
 @Qualifier annotation class AuthPrefsStore
+@Qualifier annotation class PushPrefsStore
 @Qualifier annotation class CookiePrefs
 
 @Module
@@ -34,11 +35,21 @@ internal object DataStoreModule {
 
     @Provides
     @Singleton
+    @PushPrefsStore
+    fun providePushPrefsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.pushPrefsDataStore
+
+    @Provides
+    @Singleton
     fun provideAppPrefs(@AppPrefsStore store: DataStore<Preferences>): AppPrefs = AppPrefs(store)
 
     @Provides
     @Singleton
     fun provideAuthPrefs(@AuthPrefsStore store: DataStore<Preferences>): AuthPrefs = AuthPrefs(store)
+
+    @Provides
+    @Singleton
+    fun providePushPrefs(@PushPrefsStore store: DataStore<Preferences>): PushPrefs = PushPrefs(store)
 
     @Provides
     @Singleton

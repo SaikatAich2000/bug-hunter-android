@@ -45,7 +45,7 @@ import com.bughunter.core.ui.components.BhTextField
 import com.bughunter.core.ui.theme.LocalAccentGradient
 import com.bughunter.core.ui.theme.LocalBrandTokens
 
-private const val APP_VERSION_LABEL = "Version 2.8"
+private const val APP_VERSION_LABEL = "Version 2.9"
 
 @Composable
 internal fun LoginScreen(
@@ -243,10 +243,19 @@ private fun LoginFormPanel(
                 error = if (state.error is DomainError.RateLimited) errorText else null,
             )
             if (errorText != null && state.error !is DomainError.Unauthorized && state.error !is DomainError.RateLimited) {
+                // Tinted-background banner so the message is noticeable
+                // even when the user is mid-tap on the submit button.
                 Text(
                     text = errorText,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                        )
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
                 )
             }
             BhPrimaryButton(

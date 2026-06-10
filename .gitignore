@@ -45,6 +45,13 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# --- Firebase ---
+# google-services.json is per-project config (not strictly a secret, but
+# standard practice to keep it out of the repo). Each contributor places
+# their own copy at app/google-services.json after Firebase Console setup.
+app/google-services.json
+google-services.json
+
 # --- AI assistant / agent scratch ---
 .claude/
 .aider*

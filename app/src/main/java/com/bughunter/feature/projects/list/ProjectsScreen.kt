@@ -44,12 +44,15 @@ internal fun ProjectsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val query by viewModel.query.collectAsState()
+    val createState by viewModel.createState.collectAsState()
     ProjectsContent(
         state = state,
         query = query,
+        createState = createState,
         onQueryChange = viewModel::onQueryChange,
         onProjectClick = onProjectClick,
-        onCreate = { n, k, c, d -> viewModel.createProject(n, k, c, d) { /* no-op */ } },
+        onCreate = viewModel::createProject,
+        onCreateDialogReset = viewModel::resetCreateState,
     )
 }
 
@@ -57,20 +60,27 @@ internal fun ProjectsScreen(
 internal fun ProjectsScreenTestHarness(
     state: UiState<ProjectsListModel>,
     query: String = "",
+    createState: ProjectCreateUiState = ProjectCreateUiState(),
     onQueryChange: (String) -> Unit = {},
     onProjectClick: (Int) -> Unit = {},
-    onCreate: (String, String?, String, String) -> Unit = { _, _, _, _ -> },
+    onCreate: (String, String?, String, String, () -> Unit) -> Unit = { _, _, _, _, _ -> },
+    onCreateDialogReset: () -> Unit = {},
 ) {
-    ProjectsContent(state, query, onQueryChange, onProjectClick, onCreate)
+    ProjectsContent(
+        state, query, createState,
+        onQueryChange, onProjectClick, onCreate, onCreateDialogReset,
+    )
 }
 
 @Composable
 private fun ProjectsContent(
     state: UiState<ProjectsListModel>,
     query: String,
+    createState: ProjectCreateUiState,
     onQueryChange: (String) -> Unit,
     onProjectClick: (Int) -> Unit,
-    onCreate: (String, String?, String, String) -> Unit,
+    onCreate: (String, String?, String, String, () -> Unit) -> Unit,
+    onCreateDialogReset: () -> Unit,
 ) {
     var showCreate by remember { mutableStateOf(false) }
     Column(
@@ -137,10 +147,19 @@ private fun ProjectsContent(
 
     if (showCreate) {
         ProjectCreateDialog(
-            onDismiss = { showCreate = false },
-            onSubmit = { name, key, color, description ->
-                onCreate(name, key, color, description)
+            isSubmitting = createState.isSubmitting,
+            serverError = createState.error,
+            onDismiss = {
                 showCreate = false
+                onCreateDialogReset()
+            },
+            onSubmit = { name, key, color, description ->
+                // The ViewModel closes the dialog on success via the
+                // onSuccess callback — keeps the dialog open on error so
+                // the user can see the banner and retry.
+                onCreate(name, key, color, description) {
+                    showCreate = false
+                }
             },
         )
     }

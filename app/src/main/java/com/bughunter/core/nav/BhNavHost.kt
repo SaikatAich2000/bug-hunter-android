@@ -162,6 +162,10 @@ internal fun BhNavHost(
         composable(
             route = BhRoute.EventDetail.PATTERN,
             arguments = listOf(navArgument("eventId") { type = NavType.IntType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://bh.example.com/events/{eventId}" },
+                navDeepLink { uriPattern = "app://bughunter/event/{eventId}" },
+            ),
         ) {
             EventDetailScreen(
                 onBack = { navController.popBackStack() },

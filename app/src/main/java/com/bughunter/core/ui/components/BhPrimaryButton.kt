@@ -57,11 +57,26 @@ fun BhPrimaryButton(
         ) {
             CompositionLocalProvider(LocalContentColor provides Color.White) {
                 if (loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp,
-                    )
+                    // Show the spinner alongside the button label so users
+                    // see a clear "working…" affordance instead of a tiny
+                    // dot in an otherwise-empty button. Especially
+                    // important when the backend is slow — a bare spinner
+                    // reads as "frozen" to many users.
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.4.dp,
+                        )
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.White,
+                        )
+                    }
                 } else {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),

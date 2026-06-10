@@ -27,6 +27,7 @@ import com.bughunter.core.network.dto.UserOut
 import com.bughunter.core.ui.components.BhAvatar
 import com.bughunter.core.ui.components.BhCard
 import com.bughunter.core.ui.components.BhEmptyState
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhTextField
@@ -100,6 +101,7 @@ private fun MembersContent(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    BhErrorBanner(error = state.data.actionError)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification icon tint applied by FCM via the manifest meta-data
+         entry com.google.firebase.messaging.default_notification_color.
+         Matches the brand accent used in the SPA (#6366F1, indigo-500). -->
+    <color name="notification_accent">#FF6366F1</color>
+</resources>

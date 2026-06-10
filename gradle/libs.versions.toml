@@ -46,6 +46,18 @@ playServicesBase = "18.5.0"
 # QR
 zxing = "3.5.3"
 
+# Firebase / Cloud Messaging
+# Firebase BoM aligns all Firebase library versions to one tested set so a
+# bump here pins firebase-messaging, firebase-common, etc. simultaneously.
+# google-services is the Gradle plugin that processes app/google-services.json
+# at build time and bakes the project ID + sender ID into a generated values
+# resource. WorkManager runs the token-register call as an at-least-once job
+# so a flaky network at FCM rotation doesn't lose the token.
+firebaseBom = "33.5.1"
+googleServices = "4.4.2"
+workManager = "2.9.1"
+hiltWork = "1.2.0"
+
 # Test
 junit = "4.13.2"
 truth = "1.4.4"
@@ -111,6 +123,15 @@ play-services-base = { group = "com.google.android.gms", name = "play-services-b
 
 # QR
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+
+# Firebase / Cloud Messaging
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
+
+# WorkManager — at-least-once token register / unregister.
+work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
+hilt-androidx-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
 
 # Test (unit)
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -181,3 +202,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

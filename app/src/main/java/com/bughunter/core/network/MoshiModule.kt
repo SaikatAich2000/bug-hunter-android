@@ -15,19 +15,38 @@ import dagger.hilt.components.SingletonComponent
 import java.lang.reflect.Type
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Singleton
 
 class InstantAdapter {
     @ToJson fun toJson(instant: Instant): String = DateTimeFormatter.ISO_INSTANT.format(instant)
 
+    /**
+     * Parse a server datetime, tolerating three shapes:
+     *
+     *   1. "2026-06-10T08:52:25Z"            — canonical ISO instant (Postgres / aware ORMs)
+     *   2. "2026-06-10T08:52:25+00:00"        — ISO with explicit offset
+     *   3. "2026-06-10T08:52:25"              — naive, no timezone (SQLite + SQLAlchemy default,
+     *                                            which the enterprise backend currently emits)
+     *
+     * The previous implementation only handled (1) and (2). When the
+     * backend handed back (3) — every Instant field on every DTO — the
+     * adapter threw, Moshi raised JsonDataException, the repo mapped it
+     * to DomainError.Unknown, and the user saw "Couldn't load X" on
+     * every screen even though the HTTP response was 200/201 OK.
+     *
+     * Naive datetimes are interpreted as UTC because that matches the
+     * backend's storage convention. The alternative (system default zone)
+     * would shift timestamps by the device's offset, which is wrong for
+     * audit logs and "created at" timestamps that are meaningful only as
+     * a global wall-clock moment.
+     */
     @FromJson fun fromJson(raw: String): Instant {
-        return try {
-            Instant.parse(raw)
-        } catch (_: Exception) {
-            // Fallback: tolerate dates without milliseconds and offsets like "+00:00".
-            Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(raw))
-        }
+        runCatching { return Instant.parse(raw) }
+        runCatching { return Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(raw)) }
+        return LocalDateTime.parse(raw, DateTimeFormatter.ISO_LOCAL_DATE_TIME).toInstant(ZoneOffset.UTC)
     }
 }
 

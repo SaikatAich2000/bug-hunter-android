@@ -3,6 +3,7 @@ package com.bughunter.feature.organizations.members
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bughunter.core.data.repository.UsersRepository
+import com.bughunter.core.network.DomainError
 import com.bughunter.core.network.Result2
 import com.bughunter.core.network.dto.Role
 import com.bughunter.core.network.dto.UserOut
@@ -21,6 +22,10 @@ internal data class MembersModel(
     val query: String = "",
     val page: Int = 0,
     val pageSize: Int = 20,
+    // Last error from changeRole / deleteMember. Rendered as a BhErrorBanner
+    // above the search row so a failed action never silently "does nothing"
+    // (the previous behavior — Result2.Err was swallowed via `-> Unit`).
+    val actionError: DomainError? = null,
 ) {
     val filtered: List<UserOut>
         get() = if (query.isBlank()) users else users.filter {
@@ -62,21 +67,23 @@ internal class MembersViewModel @Inject constructor(
 
     fun changeRole(userId: Int, role: Role) {
         viewModelScope.launch {
-            when (repo.update(userId, UserUpdate(role = role))) {
+            when (val result = repo.update(userId, UserUpdate(role = role))) {
                 is Result2.Ok -> load()
-                is Result2.Err -> Unit
+                is Result2.Err -> mutate { it.copy(actionError = result.error) }
             }
         }
     }
 
     fun deleteMember(userId: Int) {
         viewModelScope.launch {
-            when (repo.delete(userId)) {
+            when (val result = repo.delete(userId)) {
                 is Result2.Ok -> load()
-                is Result2.Err -> Unit
+                is Result2.Err -> mutate { it.copy(actionError = result.error) }
             }
         }
     }
+
+    fun dismissActionError() = mutate { it.copy(actionError = null) }
 
     private inline fun mutate(crossinline f: (MembersModel) -> MembersModel) {
         _state.update { current ->

@@ -19,6 +19,6 @@ internal class UserAgentInterceptor @Inject constructor() : Interceptor {
     }
 
     companion object {
-        const val USER_AGENT = "Bug Hunter Android/2.8.0"
+        const val USER_AGENT = "Bug Hunter Android/2.9.0"
     }
 }

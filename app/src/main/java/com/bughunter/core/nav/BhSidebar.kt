@@ -175,7 +175,7 @@ private fun BhSidebarBrandRow(gradient: androidx.compose.ui.graphics.Brush) {
                 fontWeight = FontWeight.ExtraBold,
             )
             Text(
-                text = "v2.8",
+                text = "v2.9",
                 style = MaterialTheme.typography.labelSmall,
                 color = LocalBrandTokens.current.textFaint,
             )

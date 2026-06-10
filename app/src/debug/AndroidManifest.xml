@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only manifest overlay. Merged with the main manifest at build
+  time for debug builds; release builds use only the main manifest, so
+  cleartext HTTP is NEVER permitted in production.
+
+  Why this exists: local development typically points the app at a
+  FastAPI server on http://10.0.2.2:8000 (Android emulator) or
+  http://192.168.x.y:8000 (real device on the same LAN). Both are
+  cleartext HTTP. Without this overlay, the system blocks the requests
+  with `CLEARTEXT communication not permitted by network security
+  policy`, producing the same "Network unavailable" error as a real
+  timeout — making the actual failure indistinguishable from a slow
+  connection.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config_debug" />
+</manifest>

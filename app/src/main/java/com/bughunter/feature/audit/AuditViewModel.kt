@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bughunter.core.data.repository.AuditRepository
+import com.bughunter.core.network.DomainError
 import com.bughunter.core.network.Result2
 import com.bughunter.core.network.dto.ActivityOut
 import com.bughunter.core.ui.util.UiState
@@ -34,6 +35,11 @@ internal data class AuditUiState(
     val filters: AuditFilters = AuditFilters(),
     val isExporting: Boolean = false,
     val exportedFileName: String? = null,
+    // Surfaced if the CSV export call fails. Previously the Result2.Err
+    // branch just toggled isExporting=false with no message, so the
+    // Export button quietly stopped spinning and the user assumed it had
+    // already finished (or worse, that "nothing" happened).
+    val exportError: DomainError? = null,
 )
 
 @HiltViewModel
@@ -96,7 +102,7 @@ internal class AuditViewModel @Inject constructor(
 
     fun exportCsv() {
         viewModelScope.launch {
-            _state.update { it.copy(isExporting = true) }
+            _state.update { it.copy(isExporting = true, exportError = null) }
             val f = _state.value.filters
             val actorId = f.actorUserIdText.toIntOrNull()
             when (val result = repository.exportCsvStream(
@@ -110,13 +116,19 @@ internal class AuditViewModel @Inject constructor(
                         it.copy(isExporting = false, exportedFileName = fileName)
                     }
                 }
-                is Result2.Err -> _state.update { it.copy(isExporting = false) }
+                is Result2.Err -> _state.update {
+                    it.copy(isExporting = false, exportError = result.error)
+                }
             }
         }
     }
 
     fun dismissExportToast() {
         _state.update { it.copy(exportedFileName = null) }
+    }
+
+    fun dismissExportError() {
+        _state.update { it.copy(exportError = null) }
     }
 
     private suspend fun writeToDownloads(bytes: ByteArray): String? = withContext(Dispatchers.IO) {

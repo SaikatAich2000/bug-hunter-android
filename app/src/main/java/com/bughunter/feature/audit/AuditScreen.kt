@@ -31,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bughunter.core.network.dto.ActivityOut
 import com.bughunter.core.ui.components.BhCard
 import com.bughunter.core.ui.components.BhEmptyState
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhTextField
@@ -127,6 +128,7 @@ private fun AuditContent(
                     loading = state.isExporting,
                 )
             }
+            BhErrorBanner(error = state.exportError)
             BhCard {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     BhTextField(

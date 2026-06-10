@@ -79,9 +79,14 @@ internal class AuthInterceptor @Inject constructor(
             response.close()
             reseedInFlight = true
             try {
-                val reseed = chain.proceed(buildMeRequest(request.url))
+                val reseed = chain.proceed(buildSeedRequest(request.url))
                 reseed.close()
                 authEventBus.emit(AuthEvent.CsrfReseedNeeded)
+                // The retry must flow back through CsrfInterceptor so the
+                // freshly-issued bh_csrf cookie is read into the
+                // X-CSRF-Token header. NetworkModule keeps Auth above Csrf
+                // in the chain specifically so chain.proceed() here hits
+                // Csrf on the way down — see NetworkModule.provideOkHttpClient.
                 return chain.proceed(request.newBuilder().build())
             } finally {
                 reseedInFlight = false
@@ -96,9 +101,13 @@ internal class AuthInterceptor @Inject constructor(
         return response
     }
 
-    private fun buildMeRequest(originalUrl: HttpUrl): Request {
+    private fun buildSeedRequest(originalUrl: HttpUrl): Request {
+        // Must target /api/health — that is the ONE non-HTML GET on which
+        // the backend's CSRFMiddleware emits a Set-Cookie: bh_csrf=...
+        // header (see app/csrf.py). The previous /api/auth/me target was a
+        // no-op for cookie issuance, so the retry would always 403 again.
         val seedUrl = originalUrl.newBuilder()
-            .encodedPath("/api/auth/me")
+            .encodedPath("/api/health")
             .query(null)
             .build()
         return Request.Builder().url(seedUrl).get().build()

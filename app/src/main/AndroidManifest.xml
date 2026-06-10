@@ -73,5 +73,48 @@
                 <data android:scheme="app" android:host="bughunter" />
             </intent-filter>
         </activity>
+
+        <!-- FCM receiver service. exported=false: only the system can
+             deliver MESSAGING_EVENT intents. The intent-filter is
+             required by Firebase even though the system is the only
+             allowed source. -->
+        <service
+            android:name=".core.push.BugHunterFcmService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Default icon + tint used by FCM if the data payload
+             doesn't override them. ic_stat_notification is a white-only
+             vector — Android status bars require monochrome icons. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
+        <!-- Fallback channel — only used when a system-delivered
+             notification payload omits the channel_id. Our data-only
+             messages always set their own channel. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/fcm_default_channel_id" />
+
+        <!-- WorkManager initializer is auto-bound by androidx.startup,
+             but Hilt requires we disable the default initializer and
+             let HiltWorkerFactory provide the configuration. See
+             BugHunterApplication for the Configuration.Provider impl. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
     </application>
 </manifest>

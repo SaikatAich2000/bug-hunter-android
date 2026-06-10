@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only network security policy.
+
+  Production release builds use the system default, which forbids
+  cleartext HTTP. This debug-only override allows cleartext to ANY
+  destination so contributors can point the app at either:
+
+    - http://10.0.2.2:8000              (Android emulator → host)
+    - http://localhost:8000              (via `adb reverse tcp:8000 ...`)
+    - http://<laptop-LAN-IP>:8000        (real phone on same WiFi)
+    - http://10.x.x.x:8000               (corporate LAN)
+    - http://192.168.x.x:8000            (home/office router)
+    - http://172.16-31.x.x:8000          (less common private range)
+
+  Enumerating every possible LAN address is impractical (every home
+  router has different DHCP defaults), so the simpler posture is "any
+  cleartext is fine in debug, no cleartext at all in release". The
+  release manifest does NOT reference this file, so the production APK
+  is unaffected.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

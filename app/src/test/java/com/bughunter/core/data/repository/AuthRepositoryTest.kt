@@ -12,7 +12,10 @@ import com.bughunter.core.network.api.MetaApi
 import com.bughunter.core.network.api.TotpApi
 import com.bughunter.core.network.dto.LoginIn
 import com.bughunter.core.network.dto.LoginResponse
+import com.bughunter.core.push.PushTokenSync
 import com.bughunter.feature.auth.AuthStateHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +59,8 @@ class AuthRepositoryTest {
         appPrefs = newAppPrefs(),
         cookieJar = jar,
         stateHolder = AuthStateHolder(),
+        pushTokenSyncer = PushTokenSync.Noop,
+        pushScope = CoroutineScope(SupervisorJob()),
         moshi = moshi,
     )
 

@@ -31,6 +31,7 @@ import com.bughunter.core.network.dto.InvitationOut
 import com.bughunter.core.ui.components.BhCard
 import com.bughunter.core.ui.components.BhDangerButton
 import com.bughunter.core.ui.components.BhEmptyState
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhTopAppBar
@@ -115,16 +116,19 @@ private fun InvitationsContent(
                     title = "No invitations yet.",
                     helper = "Click + Invite a teammate to send one.",
                 )
-                is UiState.Success -> LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(items = state.data.invitations, key = { it.id }) { item ->
-                        InvitationRow(
-                            item = item,
-                            status = state.data.displayStatus(item),
-                            onRevoke = { onRevoke(item.id) },
-                        )
+                is UiState.Success -> {
+                    BhErrorBanner(error = state.data.actionError)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(items = state.data.invitations, key = { it.id }) { item ->
+                            InvitationRow(
+                                item = item,
+                                status = state.data.displayStatus(item),
+                                onRevoke = { onRevoke(item.id) },
+                            )
+                        }
                     }
                 }
             }

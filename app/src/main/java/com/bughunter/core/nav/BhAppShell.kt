@@ -55,9 +55,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bughunter.R
 import com.bughunter.core.data.local.AppPrefs
+import com.bughunter.core.push.NotificationPermissionPrompt
 import com.bughunter.core.ui.components.BhGradientText
 import com.bughunter.core.ui.theme.LocalAccentGradient
 import com.bughunter.feature.auth.AuthState
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private val MediumWidthThreshold: Dp = 600.dp
@@ -97,6 +99,19 @@ internal fun BhAppShell(
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentRoute: String? = currentBackStack?.destination?.route
 
+    // Forward intents from MainActivity (push tap, app-link, etc.) into
+    // the nav controller so deep links resolve correctly on warm start.
+    // handleDeepLink walks the registered deepLinks set and navigates if
+    // it finds a match; unmatched intents are no-ops. We only honour
+    // push-driven intents once the user is authenticated — pushing into
+    // a bug screen while still on Login would loop the auth gate.
+    LaunchedEffect(navController, authState) {
+        if (authState !is AuthState.Authenticated) return@LaunchedEffect
+        PushIntentBus.intents.collectLatest { intent ->
+            runCatching { navController.handleDeepLink(intent) }
+        }
+    }
+
     LaunchedEffect(authState, currentRoute) {
         val onSplash = currentRoute == BhRoute.Splash.path
         when (authState) {
@@ -127,6 +142,14 @@ internal fun BhAppShell(
 
     val isAuthRoute = BhRoutes.isAuthRoute(currentRoute)
     val me = (authState as? AuthState.Authenticated)?.me
+
+    // Permission rationale dialog — fires on first launch BEFORE the
+    // user signs in, so the system permission prompt is the first thing
+    // they see (the standard Android UX). The prompt has internal once-
+    // per-install latching via PushPrefs, so re-launches won't re-show
+    // it. Below Android 13 the composable silently no-ops; the
+    // permission is granted at install time anyway.
+    NotificationPermissionPrompt()
 
     val navHostContent: @Composable (PaddingValues) -> Unit = { padding ->
         BhNavHost(

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhTextField
@@ -129,13 +130,11 @@ private fun EventFormDialogContent(
                     label = "Description",
                     singleLine = false,
                 )
-                if (state.error != null) {
-                    Text(
-                        text = "Couldn't save event.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
+                // Tinted-banner error — was a tiny "Couldn't save event."
+                // line before, which users routinely missed on slow
+                // networks where the result arrived after they'd already
+                // moved focus.
+                BhErrorBanner(error = state.error)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,

@@ -3,6 +3,7 @@ package com.bughunter.feature.projects.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bughunter.core.data.repository.ProjectsRepository
+import com.bughunter.core.network.DomainError
 import com.bughunter.core.network.Result2
 import com.bughunter.core.network.dto.ProjectIn
 import com.bughunter.core.network.dto.ProjectOut
@@ -26,6 +27,14 @@ internal data class ProjectsListModel(
         }
 }
 
+/** Per-form UI state for the project-create dialog. Keeps the
+ *  submitting flag and error tied to the dialog instance so the user
+ *  sees feedback in the same place they tapped Create. */
+internal data class ProjectCreateUiState(
+    val isSubmitting: Boolean = false,
+    val error: DomainError? = null,
+)
+
 @HiltViewModel
 internal class ProjectsViewModel @Inject constructor(
     private val repo: ProjectsRepository,
@@ -36,6 +45,9 @@ internal class ProjectsViewModel @Inject constructor(
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
+
+    private val _createState = MutableStateFlow(ProjectCreateUiState())
+    val createState: StateFlow<ProjectCreateUiState> = _createState.asStateFlow()
 
     init {
         load()
@@ -64,15 +76,30 @@ internal class ProjectsViewModel @Inject constructor(
         }
     }
 
-    fun createProject(name: String, key: String?, color: String, description: String, onDone: (Boolean) -> Unit) {
+    /** Clears any stale create-flow error when the dialog opens/closes
+     *  so the next attempt starts with a clean slate. */
+    fun resetCreateState() {
+        _createState.value = ProjectCreateUiState()
+    }
+
+    fun createProject(name: String, key: String?, color: String, description: String, onSuccess: () -> Unit) {
+        if (_createState.value.isSubmitting) return
+        _createState.value = ProjectCreateUiState(isSubmitting = true)
         viewModelScope.launch {
             val body = ProjectIn(name = name, key = key, description = description, color = color)
-            when (repo.create(body)) {
+            when (val result = repo.create(body)) {
                 is Result2.Ok -> {
-                    onDone(true)
+                    _createState.value = ProjectCreateUiState()
+                    onSuccess()
                     load()
                 }
-                is Result2.Err -> onDone(false)
+                is Result2.Err -> {
+                    // Surface the error in state instead of swallowing it.
+                    // The dialog reads createState.error and renders a
+                    // BhErrorBanner so the user knows why nothing
+                    // happened — silent failure was the v2.10 bug.
+                    _createState.value = ProjectCreateUiState(error = result.error)
+                }
             }
         }
     }

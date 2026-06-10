@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bughunter.core.network.dto.ProjectOut
 import com.bughunter.core.network.dto.UserOut
 import com.bughunter.core.ui.components.BhAssigneeChip
+import com.bughunter.core.ui.components.BhErrorBanner
 import com.bughunter.core.ui.components.BhIconButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhSectionHeader
@@ -114,6 +115,31 @@ internal fun BugCreateContent(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Form-level error banner — the v2.10 silent-fail bug
+            // landed here: `model.form.error` was being set on Result2.Err
+            // but no screen rendered it. CSRF 403s, server validation
+            // failures, and network blips all silently no-op'd the
+            // Create button. The banner is now non-negotiable on every
+            // create form.
+            BhErrorBanner(error = model.form.error)
+            // Helper hint when the form is invalid but no server error
+            // is in play — explains WHY the Create button is greyed.
+            val canSubmit = model.form.canSubmit
+            if (!canSubmit && model.form.error == null) {
+                val hint = when {
+                    model.form.projectId == null -> "Pick a project to continue."
+                    model.form.title.trim().length < 3 -> "Title must be at least 3 characters."
+                    model.form.title.trim().length > 200 -> "Title must be 200 characters or fewer."
+                    else -> null
+                }
+                if (hint != null) {
+                    Text(
+                        text = hint,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
             ProjectPicker(
                 selected = model.projects.firstOrNull { it.id == model.form.projectId },
                 options = model.projects,

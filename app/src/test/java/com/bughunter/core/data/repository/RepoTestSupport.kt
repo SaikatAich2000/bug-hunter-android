@@ -43,7 +43,31 @@ internal object RepoTestSupport {
         .addInterceptor(CsrfInterceptor(cookieJar))
         .build()
 
-    fun retrofit(server: MockWebServer, moshi: Moshi = moshi(), client: OkHttpClient = client()): Retrofit =
+    /**
+     * Client wired to [server] with a CSRF cookie pre-seeded in [cookieJar].
+     *
+     * Use this in tests that exercise mutating endpoints — otherwise
+     * [CsrfInterceptor] (correctly) does an inline GET /api/health on
+     * the first POST/PUT/PATCH/DELETE, which consumes a queued
+     * MockResponse the test author didn't intend.
+     */
+    fun preseededClient(server: MockWebServer, cookieJar: EncryptedCookieJar = cookieJar()): OkHttpClient {
+        seedCsrf(cookieJar, server.url("/"))
+        return OkHttpClient.Builder()
+            .cookieJar(cookieJar)
+            .addInterceptor(CsrfInterceptor(cookieJar))
+            .build()
+    }
+
+    fun retrofit(
+        server: MockWebServer,
+        moshi: Moshi = moshi(),
+        // Default to a pre-seeded client so existing repo tests that
+        // hit mutating endpoints don't have to add boilerplate. Tests
+        // that need the cold-start "no cookie" path can build their own
+        // client via [client] explicitly.
+        client: OkHttpClient = preseededClient(server),
+    ): Retrofit =
         Retrofit.Builder()
             .baseUrl(server.url("/"))
             .client(client)

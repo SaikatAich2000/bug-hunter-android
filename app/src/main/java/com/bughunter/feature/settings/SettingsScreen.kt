@@ -198,7 +198,7 @@ private fun SettingsContent(
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = "Bug Hunter for Android 2.8",
+            text = "Bug Hunter for Android 2.9",
             style = MaterialTheme.typography.labelSmall,
             color = tokens.textFaint,
         )
