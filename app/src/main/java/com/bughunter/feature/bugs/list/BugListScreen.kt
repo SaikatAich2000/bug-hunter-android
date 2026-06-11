@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +41,7 @@ import com.bughunter.core.network.dto.ProjectOut
 import com.bughunter.core.network.dto.UserOut
 import com.bughunter.core.ui.components.BhEmptyState
 import com.bughunter.core.ui.components.BhPrimaryButton
+import com.bughunter.core.ui.components.BhShimmerList
 import com.bughunter.core.ui.components.BhTextField
 import com.bughunter.core.ui.theme.LocalBrandTokens
 import com.bughunter.core.ui.util.UiState
@@ -192,10 +192,14 @@ private fun BugListBody(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(items = items, key = { it.id }) { bug ->
+                        // animateItem(): rows fade in on first appearance and
+                        // glide (rather than jump) when filtering/sorting
+                        // reorders the list. Keyed items make this stable.
+                        val rowModifier = Modifier.animateItem()
                         if (tablet) {
-                            BugRowTablet(bug = bug, onClick = { onOpenBug(bug.id) })
+                            BugRowTablet(bug = bug, onClick = { onOpenBug(bug.id) }, modifier = rowModifier)
                         } else {
-                            BugRowCard(bug = bug, onClick = { onOpenBug(bug.id) })
+                            BugRowCard(bug = bug, onClick = { onOpenBug(bug.id) }, modifier = rowModifier)
                         }
                     }
                     item {
@@ -281,9 +285,14 @@ private fun BugListTableHeader() {
 
 @Composable
 private fun CenteredLoader() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-    }
+    // Skeleton rows instead of a bare spinner: the page keeps its list
+    // layout while loading so the content landing doesn't cause a jump.
+    BhShimmerList(
+        count = 8,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+    )
 }
 
 @Composable

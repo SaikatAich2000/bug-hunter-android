@@ -1,5 +1,8 @@
 package com.bughunter.feature.analytics.charts
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -57,6 +61,12 @@ private fun HorizontalBarRowItem(
     color: Color,
     palette: ChartPalette,
 ) {
+    // Bars ease out to their ratio when data lands or changes.
+    val animatedRatio by animateFloatAsState(
+        targetValue = ratio,
+        animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
+        label = "hBarRatio",
+    )
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -96,7 +106,7 @@ private fun HorizontalBarRowItem(
                 size = Size(size.width, size.height),
                 cornerRadius = CornerRadius(6f, 6f),
             )
-            val width = size.width * ratio.coerceIn(0f, 1f)
+            val width = size.width * animatedRatio.coerceIn(0f, 1f)
             if (width > 0f) {
                 drawRoundRect(
                     color = color,

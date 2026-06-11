@@ -1,10 +1,14 @@
 package com.bughunter.feature.chatbot
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,10 +71,22 @@ internal fun SleuthOverlayContent(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing),
     ) {
+        // Panel springs up from the FAB it expands out of: slide-up +
+        // fade + slight scale reads as "the FAB grew into this panel".
         AnimatedVisibility(
             visible = state.isPanelOpen,
-            enter = fadeIn() + scaleIn(initialScale = 0.96f),
-            exit = fadeOut() + scaleOut(targetScale = 0.96f),
+            enter = fadeIn() +
+                slideInVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                    initialOffsetY = { it / 6 },
+                ) +
+                scaleIn(initialScale = 0.94f),
+            exit = fadeOut() +
+                slideOutVertically(targetOffsetY = { it / 8 }) +
+                scaleOut(targetScale = 0.96f),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 90.dp),

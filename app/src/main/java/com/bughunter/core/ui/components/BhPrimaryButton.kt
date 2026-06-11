@@ -1,6 +1,11 @@
 package com.bughunter.core.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,10 +21,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.bughunter.core.ui.theme.BhButtonShape
 import com.bughunter.core.ui.theme.LocalAccentGradient
@@ -35,10 +43,25 @@ fun BhPrimaryButton(
 ) {
     val gradient = LocalAccentGradient.current
     val widthMod = if (fullWidth) Modifier.defaultMinSize(minHeight = 44.dp) else Modifier
+    // Spring scale-down while pressed — tactile confirmation that the tap
+    // registered, mirroring BhCard's press behaviour.
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.96f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "buttonPressScale",
+    )
     Button(
         onClick = onClick,
         enabled = enabled && !loading,
-        modifier = modifier.then(widthMod),
+        interactionSource = interactionSource,
+        modifier = modifier
+            .then(widthMod)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
         shape = BhButtonShape,
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(

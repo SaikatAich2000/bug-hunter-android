@@ -1,5 +1,8 @@
 package com.bughunter.feature.analytics.charts
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -25,6 +32,12 @@ internal fun BhLineChart(
     height: Int = 180,
     palette: ChartPalette = rememberChartPalette(),
 ) {
+    // The series traces in left-to-right when the data lands: the line,
+    // area fill and dots are clipped to an expanding window.
+    val trace = remember(data) { Animatable(0f) }
+    LaunchedEffect(data) {
+        trace.animateTo(1f, animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing))
+    }
     Column(modifier = modifier.fillMaxWidth()) {
         Canvas(
             modifier = Modifier
@@ -52,26 +65,31 @@ internal fun BhLineChart(
                 lineTo(points.last().x, padTop + plotH)
                 close()
             }
-            drawPath(
-                path = areaPath,
-                brush = Brush.verticalGradient(
-                    0f to palette.primary.copy(alpha = 0.35f),
-                    1f to palette.primary.copy(alpha = 0f),
-                    startY = padTop,
-                    endY = padTop + plotH,
-                ),
-            )
-            val linePath = Path().apply {
-                moveTo(points.first().x, points.first().y)
-                points.drop(1).forEach { lineTo(it.x, it.y) }
-            }
-            drawPath(
-                path = linePath,
-                color = palette.primary,
-                style = Stroke(width = 2.5f),
-            )
-            points.forEach { point ->
-                drawCircle(color = palette.primary, radius = 3.5f, center = point)
+            // Reading trace.value inside the draw scope means only the draw
+            // phase re-runs per animation frame, not composition.
+            val revealRight = padLeft + plotW * trace.value
+            clipRect(left = 0f, top = 0f, right = revealRight, bottom = size.height) {
+                drawPath(
+                    path = areaPath,
+                    brush = Brush.verticalGradient(
+                        0f to palette.primary.copy(alpha = 0.35f),
+                        1f to palette.primary.copy(alpha = 0f),
+                        startY = padTop,
+                        endY = padTop + plotH,
+                    ),
+                )
+                val linePath = Path().apply {
+                    moveTo(points.first().x, points.first().y)
+                    points.drop(1).forEach { lineTo(it.x, it.y) }
+                }
+                drawPath(
+                    path = linePath,
+                    color = palette.primary,
+                    style = Stroke(width = 2.5f),
+                )
+                points.forEach { point ->
+                    drawCircle(color = palette.primary, radius = 3.5f, center = point)
+                }
             }
         }
         if (data.isNotEmpty()) {

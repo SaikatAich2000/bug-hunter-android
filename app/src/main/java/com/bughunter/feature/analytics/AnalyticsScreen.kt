@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -101,23 +102,31 @@ private fun AnalyticsSuccess(
     onTabSelect: (DashboardTypeTab) -> Unit,
 ) {
     val palette = rememberChartPalette()
-    val timelineData = model.stats.timeline.map { it.label to it.count.toDouble() }
-    val priorityData = model.stats.byPriority.map { (k, v) -> k to v.toDouble() }
-    val statusData = model.stats.byStatus.take(STATUS_BARS).map { (k, v) -> k to v.toDouble() }
-    val envData = model.stats.byEnvironment.map { (k, v) -> k to v.toDouble() }
-    val projectRows = model.stats.byProject.map {
-        HorizontalBarRow(
-            label = it.key?.let { key -> "$key  ${it.name}" } ?: it.name,
-            value = it.count.toDouble(),
-            swatchColor = it.color?.let(::parseHexColor),
-        )
+    // remember(stats): these projections allocate fresh lists; without
+    // memoisation every recomposition rebuilds them and breaks chart
+    // skipping further down the tree.
+    val stats = model.stats
+    val timelineData = remember(stats) { stats.timeline.map { it.label to it.count.toDouble() } }
+    val priorityData = remember(stats) { stats.byPriority.map { (k, v) -> k to v.toDouble() } }
+    val statusData = remember(stats) { stats.byStatus.take(STATUS_BARS).map { (k, v) -> k to v.toDouble() } }
+    val envData = remember(stats) { stats.byEnvironment.map { (k, v) -> k to v.toDouble() } }
+    val projectRows = remember(stats) {
+        stats.byProject.map {
+            HorizontalBarRow(
+                label = it.key?.let { key -> "$key  ${it.name}" } ?: it.name,
+                value = it.count.toDouble(),
+                swatchColor = it.color?.let(::parseHexColor),
+            )
+        }
     }
-    val assigneeRows = model.stats.byAssignee.map {
-        HorizontalBarRow(
-            label = it.name,
-            value = it.count.toDouble(),
-            secondary = it.email,
-        )
+    val assigneeRows = remember(stats) {
+        stats.byAssignee.map {
+            HorizontalBarRow(
+                label = it.name,
+                value = it.count.toDouble(),
+                secondary = it.email,
+            )
+        }
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

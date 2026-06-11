@@ -240,15 +240,18 @@ private fun ChatTab(
         contentPadding = PaddingValues(vertical = 10.dp),
     ) {
         itemsIndexed(state.turns, key = { i, t -> "${t.createdAtEpochMs}-$i" }) { turnIndex, turn ->
-            when (turn) {
-                is ChatTurn.UserSaid -> UserMessageBubble(text = turn.text)
-                is ChatTurn.SystemSaid -> SystemMessageBubble(text = turn.text)
-                is ChatTurn.BotTyping -> {
-                    if (state.settings.showTypingIndicator) {
-                        BotMessageBubble { TypingIndicator() }
+            // New messages fade/slide into place instead of popping in.
+            // Keys are stable so animateItem only fires for fresh turns.
+            Box(modifier = Modifier.animateItem()) {
+                when (turn) {
+                    is ChatTurn.UserSaid -> UserMessageBubble(text = turn.text)
+                    is ChatTurn.SystemSaid -> SystemMessageBubble(text = turn.text)
+                    is ChatTurn.BotTyping -> {
+                        if (state.settings.showTypingIndicator) {
+                            BotMessageBubble { TypingIndicator() }
+                        }
                     }
-                }
-                is ChatTurn.BotSaid -> BotMessageBubble {
+                    is ChatTurn.BotSaid -> BotMessageBubble {
                     turn.blocks.forEachIndexed { blockIndex, block ->
                         when (block) {
                             is RenderedChatBlock.Text -> TextBlockRenderer(block = block)
@@ -273,6 +276,7 @@ private fun ChatTab(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
+                    }
                     }
                 }
             }

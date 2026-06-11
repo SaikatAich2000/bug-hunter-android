@@ -1,5 +1,8 @@
 package com.bughunter.feature.analytics.charts
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -27,6 +33,12 @@ internal fun BhBarChart(
     palette: ChartPalette = rememberChartPalette(),
     colorOverrides: Map<String, Color> = emptyMap(),
 ) {
+    // Bars grow from the baseline when the data lands (and re-run when
+    // it changes) — progress scales every bar height in the draw pass.
+    val growth = remember(data) { Animatable(0f) }
+    LaunchedEffect(data) {
+        growth.animateTo(1f, animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing))
+    }
     Column(modifier = modifier.fillMaxWidth()) {
         Canvas(
             modifier = Modifier
@@ -53,7 +65,9 @@ internal fun BhBarChart(
             }
             data.forEachIndexed { index, (label, value) ->
                 val xCenter = groupWidth * index + groupWidth / 2f
-                val barHeight = (value / maxValue).toFloat() * plotH
+                // Reading growth.value inside the draw scope means only the
+                // draw phase re-runs per animation frame, not composition.
+                val barHeight = (value / maxValue).toFloat() * plotH * growth.value
                 val color = colorOverrides[label] ?: palette.colorAt(index)
                 drawRoundRect(
                     color = color,

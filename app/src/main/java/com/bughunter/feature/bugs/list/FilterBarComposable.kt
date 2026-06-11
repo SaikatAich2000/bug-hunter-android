@@ -53,6 +53,13 @@ internal fun FilterBar(
     onClear: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // remember(source): projects/users change rarely but this bar
+    // recomposes on every filter tap — don't rebuild the option lists
+    // (and the selected-key sets) each time.
+    val projectOptions = remember(projects) { projects.map { FilterOption(it.id.toString(), it.name) } }
+    val userOptions = remember(users) { users.map { FilterOption(it.id.toString(), it.name) } }
+    val selectedProjectKeys = remember(filters.projectIds) { filters.projectIds.map { it.toString() }.toSet() }
+    val selectedAssigneeKeys = remember(filters.assigneeIds) { filters.assigneeIds.map { it.toString() }.toSet() }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -63,8 +70,8 @@ internal fun FilterBar(
     ) {
         MultiSelectDropdown(
             label = "Project",
-            options = projects.map { FilterOption(it.id.toString(), it.name) },
-            selectedKeys = filters.projectIds.map { it.toString() }.toSet(),
+            options = projectOptions,
+            selectedKeys = selectedProjectKeys,
             onToggle = { key -> onToggleProject(key.toInt()) },
         )
         MultiSelectDropdown(
@@ -93,8 +100,8 @@ internal fun FilterBar(
         )
         MultiSelectDropdown(
             label = "Assignee",
-            options = users.map { FilterOption(it.id.toString(), it.name) },
-            selectedKeys = filters.assigneeIds.map { it.toString() }.toSet(),
+            options = userOptions,
+            selectedKeys = selectedAssigneeKeys,
             onToggle = { key -> onToggleAssignee(key.toInt()) },
         )
         if (filters.hasActiveFilters) {

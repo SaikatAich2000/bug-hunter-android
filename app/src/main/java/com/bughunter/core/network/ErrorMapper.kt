@@ -67,14 +67,14 @@ class ErrorMapper @Inject constructor(
         } else {
             val map = mapAdapter.fromJson(body) ?: emptyMap()
             when (val detail = map["detail"]) {
-                is String -> ParsedDetail(message = detail, fieldErrors = emptyList())
+                is String -> ParsedDetail(message = sanitizeMessage(detail), fieldErrors = emptyList())
                 is List<*> -> {
                     val fields = detail.mapNotNull { entry ->
                         if (entry !is Map<*, *>) return@mapNotNull null
                         val loc = (entry["loc"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
                         val msg = entry["msg"]?.toString() ?: return@mapNotNull null
                         val type = entry["type"]?.toString() ?: "validation_error"
-                        FieldError(location = loc, message = msg, type = type)
+                        FieldError(location = loc, message = sanitizeMessage(msg), type = type)
                     }
                     ParsedDetail(message = null, fieldErrors = fields)
                 }
@@ -85,12 +85,27 @@ class ErrorMapper @Inject constructor(
         null
     }
 
+    /**
+     * Server error strings render verbatim in snackbars / banners. The
+     * server is ours, but a compromised or misconfigured backend (or a
+     * proxy injecting an HTML error page) shouldn't get markup, control
+     * characters, or an unbounded wall of text into the UI.
+     */
+    private fun sanitizeMessage(raw: String): String = raw
+        .replace(HTML_TAG_RE, "")
+        .filter { it == '\n' || !it.isISOControl() }
+        .trim()
+        .take(MAX_ERROR_MESSAGE_LENGTH)
+
     internal data class ParsedDetail(
         val message: String?,
         val fieldErrors: List<FieldError>,
     )
 
     companion object {
+        private val HTML_TAG_RE = Regex("<[^>]*>")
+        private const val MAX_ERROR_MESSAGE_LENGTH = 300
+
         fun parseRetryAfter(headers: Headers): Duration? {
             val raw = headers["Retry-After"] ?: return null
             raw.toLongOrNull()?.let { return Duration.ofSeconds(it) }

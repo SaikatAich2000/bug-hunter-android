@@ -242,11 +242,19 @@ private fun LoginFormPanel(
                 keyboardType = KeyboardType.Password,
                 error = if (state.error is DomainError.RateLimited) errorText else null,
             )
-            if (errorText != null && state.error !is DomainError.Unauthorized && state.error !is DomainError.RateLimited) {
-                // Tinted-background banner so the message is noticeable
-                // even when the user is mid-tap on the submit button.
+            // Tinted-background banner so the message is noticeable even
+            // when the user is mid-tap on the submit button. Expands +
+            // fades in rather than popping so the form shift reads as
+            // intentional.
+            androidx.compose.animation.AnimatedVisibility(
+                visible = errorText != null &&
+                    state.error !is DomainError.Unauthorized &&
+                    state.error !is DomainError.RateLimited,
+                enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut(),
+            ) {
                 Text(
-                    text = errorText,
+                    text = errorText ?: "",
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier

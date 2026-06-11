@@ -1,5 +1,10 @@
 package com.bughunter.core.nav
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,10 +55,27 @@ internal fun BhNavHost(
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Screen transitions: forward navigation slides the new screen in
+    // from the right over a fade; back navigation mirrors it. Durations
+    // stay short (220ms) so navigation feels snappy, not showy.
     NavHost(
         navController = navController,
         startDestination = BhRoute.Splash.path,
         modifier = modifier,
+        enterTransition = {
+            fadeIn(animationSpec = tween(220)) +
+                slideInHorizontally(animationSpec = tween(220), initialOffsetX = { it / 8 })
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(180))
+        },
+        popEnterTransition = {
+            fadeIn(animationSpec = tween(220))
+        },
+        popExitTransition = {
+            fadeOut(animationSpec = tween(180)) +
+                slideOutHorizontally(animationSpec = tween(220), targetOffsetX = { it / 8 })
+        },
     ) {
         composable(BhRoute.Splash.path) { BhSplashScreen() }
 

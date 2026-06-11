@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +32,8 @@ import com.bughunter.core.ui.components.BhBadgeKind
 import com.bughunter.core.ui.components.BhCard
 import com.bughunter.core.ui.components.BhEmptyState
 import com.bughunter.core.ui.components.BhSectionHeader
+import com.bughunter.core.ui.components.BhShimmerBox
+import com.bughunter.core.ui.components.BhShimmerList
 import com.bughunter.core.ui.theme.LocalBrandTokens
 import com.bughunter.core.ui.util.UiState
 
@@ -184,8 +186,24 @@ private fun BugSnippet(bug: BugOut, onClick: () -> Unit) {
 
 @Composable
 private fun LoadingState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+    // Skeleton layout mirroring the loaded dashboard (KPI strip + list
+    // rows) instead of a bare spinner.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            repeat(3) {
+                BhShimmerBox(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(84.dp),
+                )
+            }
+        }
+        BhShimmerList(count = 5)
     }
 }
 

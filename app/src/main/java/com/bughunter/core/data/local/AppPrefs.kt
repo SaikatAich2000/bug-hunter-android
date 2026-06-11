@@ -31,7 +31,7 @@ class AppPrefs internal constructor(
     val navCollapsed: Flow<Boolean> = store.data.map { p -> p[KEY_NAV_COLLAPSED] ?: false }
 
     val baseUrl: Flow<String> = store.data.map { p ->
-        p[KEY_BASE_URL] ?: BASE_URL_DEFAULT
+        sanitizeBaseUrl(p[KEY_BASE_URL])
     }
 
     val lastKnownOrgId: Flow<Int?> = store.data.map { p -> p[KEY_LAST_KNOWN_ORG_ID] }
@@ -66,6 +66,27 @@ class AppPrefs internal constructor(
         // only). Trailing slash is required by Retrofit, so normalize here.
         val BASE_URL_DEFAULT: String = BuildConfig.DEFAULT_BASE_URL.let {
             if (it.endsWith("/")) it else "$it/"
+        }
+
+        /**
+         * Read-time guard on the override URL. The Settings editor writes
+         * per keystroke (so write-time validation would reject partial
+         * input), and the pref file could in principle be restored or
+         * tampered with — so the SCHEME check lives here, where every
+         * consumer (OkHttp/Retrofit via BaseUrlProvider) reads the value.
+         * Release builds accept https only; debug additionally allows
+         * http for emulator/dev servers (10.0.2.2 etc.). Anything else
+         * falls back to the Gradle-baked default rather than letting the
+         * authenticated client, cookies attached, talk to it.
+         */
+        internal fun sanitizeBaseUrl(stored: String?): String {
+            val value = stored?.trim().orEmpty()
+            if (value.isEmpty()) return BASE_URL_DEFAULT
+            val isHttps = value.startsWith("https://", ignoreCase = true)
+            val isHttp = value.startsWith("http://", ignoreCase = true)
+            val allowed = isHttps || (BuildConfig.DEBUG && isHttp)
+            if (!allowed) return BASE_URL_DEFAULT
+            return if (value.endsWith("/")) value else "$value/"
         }
 
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
