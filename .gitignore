@@ -29,6 +29,17 @@ kotlin-js-store/
 **/build/reports/
 *.exec
 
+# --- SonarQube / coverage ---
+# Kover XML lands under build/reports/kover/ (already covered above). The
+# sonarqube Gradle plugin caches under .sonar/ and .scannerwork/. The
+# scripts/sonar-export.ps1 helper dumps the issue/hotspot pulls to repo root.
+.sonar/
+.scannerwork/
+sonar-issues.json
+sonar-issues.csv
+sonar-hotspots.json
+sonar-hotspots.csv
+
 # --- macOS / Windows / Linux noise ---
 .DS_Store
 Thumbs.db

@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -17,8 +18,8 @@ android {
         applicationId = "com.bughunter"
         minSdk = 29
         targetSdk = 36
-        versionCode = 29000
-        versionName = "2.9"
+        versionCode = 30000
+        versionName = "2.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -133,6 +134,106 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+//  Kover — Kotlin code coverage for the JVM unit-test suite.
+// ──────────────────────────────────────────────────────────────────────────
+//  `koverXmlReportDebug` runs the debug unit tests and writes a JaCoCo-format
+//  XML to build/reports/kover/reportDebug.xml that SonarQube ingests.
+//
+//  The excludes below drop code that JVM unit tests structurally cannot
+//  cover — @Composable UI, generated Hilt/Moshi/Dagger glue, the
+//  Application / Activity entry points and BuildConfig — so the coverage
+//  number reflects the logic we CAN unit-test (ViewModels, repositories,
+//  interceptors, mappers, use-cases). It mirrors sonar.coverage.exclusions
+//  in the root build so the Kover report and Sonar agree on the denominator.
+// ──────────────────────────────────────────────────────────────────────────
+kover {
+    reports {
+        filters {
+            excludes {
+                // @Composable UI compiles to `<File>Kt` classes — exclude
+                // the screen / composable-helper files by class suffix.
+                // (Kover's annotatedBy("…Composable") proved unreliable for
+                // top-level @Composable functions, so we match by name.)
+                classes(
+                    "*ScreenKt",
+                    "*ComposableKt",
+                    "*ComposableSingletons*",
+                    // Compose UI by naming convention (all verified @Composable).
+                    "*DialogKt",
+                    "*PanelKt",
+                    "*OverlayKt",
+                    "*FabKt",
+                    "*SectionKt",
+                    "*BottomSheetKt",
+                    "*RowKt",
+                    "*CardKt",
+                    "*PickerKt",
+                    "*RendererKt",
+                    "*PromptKt",
+                    "*BannerKt",
+                    "*ComposerKt",
+                    "*FooterKt",
+                    // Hilt-generated entry-point shims.
+                    "*.Hilt_*",
+                    "Hilt_*",
+                    "com.bughunter.BuildConfig",
+                    "com.bughunter.MainActivity",
+                    "com.bughunter.MainActivity*",
+                    "com.bughunter.*Application",
+                    "com.bughunter.*Application*",
+                    // Generated DI / serialization / codegen glue.
+                    "*_Factory",
+                    "*_Factory*",
+                    "*_HiltModules*",
+                    "*_MembersInjector",
+                    "*_GeneratedInjector",
+                    "*_Impl",
+                    "*JsonAdapter",
+                    "hilt_aggregated_deps.*",
+                    "dagger.hilt.*",
+                    // Android-framework-coupled: these write to the device via
+                    // a @ApplicationContext ContentResolver / MediaStore, which
+                    // JVM unit tests cannot exercise without Robolectric. Covered
+                    // by instrumented tests instead.
+                    "com.bughunter.core.domain.usecase.ExportBugsCsvUseCase",
+                    "com.bughunter.core.domain.usecase.ExportBugsCsvUseCase*",
+                    "com.bughunter.core.domain.usecase.UploadAttachmentsUseCase",
+                    "com.bughunter.core.domain.usecase.UploadAttachmentsUseCase*",
+                    // Hilt DI providers (network + Moshi) + EncryptedSharedPreferences.
+                    "com.bughunter.core.network.NetworkModule",
+                    "com.bughunter.core.network.NetworkModule*",
+                    "com.bughunter.core.network.MoshiModule",
+                    "com.bughunter.core.network.MoshiModule*",
+                    "com.bughunter.core.data.local.EncryptedPrefs",
+                    "com.bughunter.core.data.local.EncryptedPrefs*",
+                )
+                // UI-only packages: Compose screens, design tokens, the
+                // app-shell navigation, chart + chat-bubble renderers, and
+                // the DI graph. Exercised by instrumented tests, not JVM.
+                packages(
+                    "com.bughunter.core.ui.theme",
+                    "com.bughunter.core.ui.components",
+                    "com.bughunter.core.nav",
+                    "com.bughunter.di",
+                    "com.bughunter.feature.analytics.charts",
+                    "com.bughunter.feature.chatbot.blocks",
+                    "com.bughunter.feature.chatbot.messages",
+                    "com.bughunter.feature.chatbot.tabs",
+                    // ContentResolver/MediaStore file-export ViewModels — same
+                    // @ApplicationContext constraint as the use-cases above;
+                    // not unit-testable on the JVM without Robolectric.
+                    "com.bughunter.feature.audit",
+                    "com.bughunter.feature.dsar",
+                    // Push stack: FCM service, registration worker, token
+                    // syncer, channel registration — all Android-framework.
+                    "com.bughunter.core.push",
+                )
+            }
         }
     }
 }

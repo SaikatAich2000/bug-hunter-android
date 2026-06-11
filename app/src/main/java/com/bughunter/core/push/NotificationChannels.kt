@@ -3,7 +3,6 @@ package com.bughunter.core.push
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import androidx.core.content.getSystemService
 import com.bughunter.R
 
@@ -43,11 +42,9 @@ internal object NotificationChannels {
     }
 
     fun registerAll(context: Context) {
-        // Channels are an O+ concept; pre-O the importance lives on each
-        // posted notification instead. Skip the registration on older
-        // devices — minSdk 29 means this branch is technically dead in
-        // production but kept for explicitness / future minSdk drops.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        // Notification channels are an O+ concept; minSdk 29 guarantees they
+        // exist, so no SDK guard is needed. Creating a channel that already
+        // exists is a no-op, so this is safe to call on every cold start.
         val manager = context.getSystemService<NotificationManager>() ?: return
         manager.createNotificationChannels(
             listOf(

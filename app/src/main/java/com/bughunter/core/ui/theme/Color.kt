@@ -13,16 +13,16 @@ internal val BhBgLight_f4f6fb = Color(0xFFF4F6FB)
 internal val BhBgElevLight_ffffff = Color(0xFFFFFFFF)
 internal val BhBgElev2Light_f1f4fb = Color(0xFFF1F4FB)
 internal val BhBgElev3Light_e6ecf6 = Color(0xFFE6ECF6)
-internal val BhSurfaceGlassDark = Color(0xB81A2138) // rgba(26,33,56,0.72)
-internal val BhSurfaceGlassLight = Color(0xC7FFFFFF) // rgba(255,255,255,0.78)
+internal val BhSurfaceGlassDark = Color(0xB81A2138) // rgba 26,33,56,0.72
+internal val BhSurfaceGlassLight = Color(0xC7FFFFFF) // rgba 255,255,255,0.78
 
 // Borders
 internal val BhBorder_232c47 = Color(0xFF232C47)
 internal val BhBorderStrong_344063 = Color(0xFF344063)
 internal val BhBorderLight_e2e8f0 = Color(0xFFE2E8F0)
 internal val BhBorderStrongLight_c8d2e0 = Color(0xFFC8D2E0)
-internal val BhBorderSoftDark = Color(0x0DFFFFFF) // rgba(255,255,255,0.05)
-internal val BhBorderSoftLight = Color(0x0D0F172A) // rgba(15,23,42,0.05)
+internal val BhBorderSoftDark = Color(0x0DFFFFFF) // rgba 255,255,255,0.05
+internal val BhBorderSoftLight = Color(0x0D0F172A) // rgba 15,23,42,0.05
 
 // Text
 internal val BhText_eef2ff = Color(0xFFEEF2FF)
@@ -41,10 +41,10 @@ internal val BhAccent2_38bdf8 = Color(0xFF38BDF8)
 internal val BhAccent2Strong_0ea5e9 = Color(0xFF0EA5E9)
 internal val BhAccent2Light_0284c7 = Color(0xFF0284C7)
 internal val BhAccent2Stronger_0369a1 = Color(0xFF0369A1)
-internal val BhAccentSoftDark = Color(0x29818CF8) // rgba(129,140,248,0.16)
-internal val BhAccentSoftLight = Color(0x1F6366F1) // rgba(99,102,241,0.12)
-internal val BhAccentGlowDark = Color(0x59818CF8) // rgba(129,140,248,0.35)
-internal val BhAccentGlowLight = Color(0x406366F1) // rgba(99,102,241,0.25)
+internal val BhAccentSoftDark = Color(0x29818CF8) // rgba 129,140,248,0.16
+internal val BhAccentSoftLight = Color(0x1F6366F1) // rgba 99,102,241,0.12
+internal val BhAccentGlowDark = Color(0x59818CF8) // rgba 129,140,248,0.35
+internal val BhAccentGlowLight = Color(0x406366F1) // rgba 99,102,241,0.25
 internal val BhAccent2SoftDark = Color(0x2938BDF8)
 internal val BhAccent2SoftLight = Color(0x1F0284C7)
 internal val BhAccentText = Color(0xFFFFFFFF)
@@ -54,8 +54,8 @@ internal val BhDanger_f43f5e = Color(0xFFF43F5E)
 internal val BhDangerStrong_e11d48 = Color(0xFFE11D48)
 internal val BhDangerLight_dc2626 = Color(0xFFDC2626)
 internal val BhDangerStrongLight_b91c1c = Color(0xFFB91C1C)
-internal val BhDangerSoftDark = Color(0x24F43F5E) // rgba(244,63,94,0.14)
-internal val BhDangerSoftLight = Color(0x1ADC2626) // rgba(220,38,38,0.10)
+internal val BhDangerSoftDark = Color(0x24F43F5E) // rgba 244,63,94,0.14
+internal val BhDangerSoftLight = Color(0x1ADC2626) // rgba 220,38,38,0.10
 
 // Warn
 internal val BhWarn_f59e0b = Color(0xFFF59E0B)
@@ -125,10 +125,9 @@ internal val BhInviteRevokedFg = Color(0xFFF8D7D7)
 internal val BhInviteExpiredBg = Color(0xFF5F4216)
 internal val BhInviteExpiredFg = Color(0xFFFBE7C4)
 
-// Overlay scrims
-internal val BhModalScrim = Color(0xA8020617) // rgba(2,6,23,0.66)
-internal val BhSidebarScrim = Color(0x8C020617) // rgba(2,6,23,0.55)
-internal val BhLoaderScrim = Color(0x6B080C16) // rgba(8,12,22,0.42)
+internal val BhModalScrim = Color(0xA8020617) // rgba 2,6,23,0.66
+internal val BhSidebarScrim = Color(0x8C020617) // rgba 2,6,23,0.55
+internal val BhLoaderScrim = Color(0x6B080C16) // rgba 8,12,22,0.42
 
 // Readonly banner amber
 internal val BhReadonlyBannerBg = Color(0x29F8A532)

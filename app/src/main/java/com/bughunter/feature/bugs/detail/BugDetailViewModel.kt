@@ -43,7 +43,7 @@ internal class BugDetailViewModel @Inject constructor(
     // crashed the app the moment Hilt instantiated this VM. Read as <Int>.
     // Fallback to -1 covers the unhappy case where the arg is missing entirely;
     // refresh() then short-circuits to UiState.Error(NotFound).
-    private val bugId: Int = savedStateHandle.get<Int>(BhRoute.BugDetail.ARG_ID) ?: -1
+    private val bugId: Int = savedStateHandle[BhRoute.BugDetail.ARG_ID] ?: -1
 
     private val _state = MutableStateFlow<UiState<BugDetailScreenModel>>(UiState.Loading)
     val state: StateFlow<UiState<BugDetailScreenModel>> = _state.asStateFlow()

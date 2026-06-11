@@ -27,8 +27,11 @@ internal object HtmlSanitizer {
         pattern = "<(/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*)>",
     )
 
+    // name = "value"  |  name = 'value'  — the name/`=` part is shared; only the
+    // quote style alternates. Group 1 = name, group 2 = double-quoted value,
+    // group 3 = single-quoted value.
     private val ATTR_REGEX = Regex(
-        pattern = "([a-zA-Z_:][-a-zA-Z0-9_:.]*)\\s*=\\s*\"([^\"]*)\"|([a-zA-Z_:][-a-zA-Z0-9_:.]*)\\s*=\\s*'([^']*)'",
+        pattern = "([a-zA-Z_:][-a-zA-Z0-9_:.]*)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)')",
     )
 
     fun sanitize(rawHtml: String): String {
@@ -48,8 +51,8 @@ internal object HtmlSanitizer {
         val allowed = ALLOWED_ATTRS[tag] ?: return ""
         val acc = StringBuilder()
         for (match in ATTR_REGEX.findAll(raw)) {
-            val name = (match.groupValues[1].ifEmpty { match.groupValues[3] }).lowercase()
-            val value = match.groupValues[2].ifEmpty { match.groupValues[4] }
+            val name = match.groupValues[1].lowercase()
+            val value = match.groupValues[2].ifEmpty { match.groupValues[3] }
             if (name !in allowed) continue
             if (name.startsWith("on")) continue
             if ((name == "href" || name == "src") && !isSafeUri(value)) continue

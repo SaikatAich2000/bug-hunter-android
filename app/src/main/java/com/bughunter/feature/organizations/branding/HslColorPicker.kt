@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +16,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,9 +41,9 @@ internal fun HslColorPicker(
 ) {
     val tokens = LocalBrandTokens.current
     val initial = remember(hexValue) { hexToHsl(hexValue) }
-    var hue by remember(hexValue) { mutableStateOf(initial.first) }
-    var sat by remember(hexValue) { mutableStateOf(initial.second) }
-    var light by remember(hexValue) { mutableStateOf(initial.third) }
+    var hue by remember(hexValue) { mutableFloatStateOf(initial.first) }
+    var sat by remember(hexValue) { mutableFloatStateOf(initial.second) }
+    var light by remember(hexValue) { mutableFloatStateOf(initial.third) }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -116,7 +115,6 @@ private fun HueBar(hue: Float, onHueChange: (Float) -> Unit) {
             ),
         )
     }
-    var trackWidth by remember { mutableStateOf(1f) }
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,7 +129,6 @@ private fun HueBar(hue: Float, onHueChange: (Float) -> Unit) {
                 }
             },
     ) {
-        trackWidth = size.width
         val x = (hue / 360f) * size.width
         drawCircle(
             color = Color.White,

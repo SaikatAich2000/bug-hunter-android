@@ -79,7 +79,6 @@ private fun AcceptInviteContent(
     onSubmit: () -> Unit,
     onBackToLogin: () -> Unit,
 ) {
-    val tokens = LocalBrandTokens.current
     Box(
         modifier = Modifier
             .fillMaxSize()

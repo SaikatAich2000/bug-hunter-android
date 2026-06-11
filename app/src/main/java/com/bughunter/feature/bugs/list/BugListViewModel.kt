@@ -107,11 +107,9 @@ internal class BugListViewModel @Inject constructor(
                     )
                     val nextPages = if (append) _model.value.pages + newPage else listOf(newPage)
                     _model.update { it.copy(pages = nextPages, isLoadingMore = false) }
-                    _state.value = if (nextPages.flatMap { it.items }.isEmpty()) {
-                        UiState.Success(_model.value)
-                    } else {
-                        UiState.Success(_model.value)
-                    }
+                    // Even an empty result set is a successful load — the
+                    // list screen renders its own empty-state row.
+                    _state.value = UiState.Success(_model.value)
                 }
                 is Result2.Err -> {
                     _model.update { it.copy(isLoadingMore = false) }

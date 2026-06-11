@@ -52,7 +52,7 @@ internal class AuthInterceptor @Inject constructor(
 
         return when (response.code) {
             401 -> handle401(response, path)
-            403 -> handle403(chain, request, response, path)
+            403 -> handle403(chain, request, response)
             429 -> handle429(response)
             else -> response
         }
@@ -72,7 +72,6 @@ internal class AuthInterceptor @Inject constructor(
         chain: Interceptor.Chain,
         request: Request,
         response: Response,
-        path: String,
     ): Response {
         val detail = peekDetail(response)
         if (detail?.startsWith("CSRF check failed") == true && !reseedInFlight) {

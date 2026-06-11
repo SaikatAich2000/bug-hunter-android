@@ -114,7 +114,7 @@ class AuthInterceptorTest {
         val req = Request.Builder().url(server.url("/api/health")).get().build()
         ok.newCall(req).execute().close()
         val recorded = server.takeRequest()
-        assertThat(recorded.getHeader("User-Agent")).isEqualTo("Bug Hunter Android/2.9.0")
+        assertThat(recorded.getHeader("User-Agent")).isEqualTo("Bug Hunter Android/2.10.0")
         assertThat(recorded.getHeader("Accept")).isEqualTo("application/json")
     }
 }

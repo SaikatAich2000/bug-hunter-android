@@ -9,6 +9,14 @@ agp = "8.7.3"
 kotlin = "2.0.20"
 ksp = "2.0.20-1.0.25"
 
+# Static analysis + coverage
+# sonarqube 5.x is the last line that supports Gradle 8 + Java 17; it auto-
+# detects the AGP source/test/bytecode layout. kover 0.8.x is the Kotlin-2.0
+# coverage engine — its XML report is JaCoCo-format, which SonarQube ingests
+# via sonar.coverage.jacoco.xmlReportPaths.
+sonarqube = "5.1.0.4882"
+kover = "0.8.3"
+
 # AndroidX core
 androidxCore = "1.13.1"
 androidxActivity = "1.9.2"
@@ -203,3 +211,5 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

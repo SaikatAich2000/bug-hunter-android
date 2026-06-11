@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class EncryptedCookiePersistence(

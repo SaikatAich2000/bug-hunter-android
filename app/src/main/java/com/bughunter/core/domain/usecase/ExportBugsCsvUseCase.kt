@@ -3,7 +3,6 @@ package com.bughunter.core.domain.usecase
 import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.bughunter.core.data.repository.BugListFilters
@@ -14,8 +13,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,46 +37,32 @@ internal class ExportBugsCsvUseCase @Inject constructor(
         }
     }
 
+    // minSdk 29, so the scoped-storage MediaStore path is the only one that
+    // ever runs — IS_PENDING + RELATIVE_PATH lets us write to Downloads without
+    // WRITE_EXTERNAL_STORAGE. (Pre-Q legacy file fallback removed; it was dead.)
     private fun writeToMediaStore(body: ResponseBody, filename: String): Result2<Export> {
         val resolver = context.contentResolver
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-            val values = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, filename)
-                put(MediaStore.Downloads.MIME_TYPE, MIME_CSV)
-                put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/$SUBDIR")
-                put(MediaStore.Downloads.IS_PENDING, 1)
-            }
-            val uri = resolver.insert(collection, values)
-                ?: return Result2.Err(DomainError.Server("Failed to allocate Downloads entry"))
-            try {
-                resolver.openOutputStream(uri)?.use { out ->
-                    body.byteStream().use { input -> input.copyTo(out) }
-                } ?: return Result2.Err(DomainError.Server("Failed to open Downloads stream"))
-            } catch (t: Throwable) {
-                resolver.delete(uri, null, null)
-                return Result2.Err(DomainError.Unknown(t))
-            }
-            values.clear()
-            values.put(MediaStore.Downloads.IS_PENDING, 0)
-            resolver.update(uri, values, null, null)
-            Result2.Ok(Export(uri = uri, filename = filename))
-        } else {
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                SUBDIR,
-            )
-            if (!dir.exists()) dir.mkdirs()
-            val file = File(dir, filename)
-            try {
-                FileOutputStream(file).use { out ->
-                    body.byteStream().use { input -> input.copyTo(out) }
-                }
-            } catch (t: Throwable) {
-                return Result2.Err(DomainError.Unknown(t))
-            }
-            Result2.Ok(Export(uri = Uri.fromFile(file), filename = filename))
+        val collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, filename)
+            put(MediaStore.Downloads.MIME_TYPE, MIME_CSV)
+            put(MediaStore.Downloads.RELATIVE_PATH, "${Environment.DIRECTORY_DOCUMENTS}/$SUBDIR")
+            put(MediaStore.Downloads.IS_PENDING, 1)
         }
+        val uri = resolver.insert(collection, values)
+            ?: return Result2.Err(DomainError.Server("Failed to allocate Downloads entry"))
+        try {
+            resolver.openOutputStream(uri)?.use { out ->
+                body.byteStream().use { input -> input.copyTo(out) }
+            } ?: return Result2.Err(DomainError.Server("Failed to open Downloads stream"))
+        } catch (t: Throwable) {
+            resolver.delete(uri, null, null)
+            return Result2.Err(DomainError.Unknown(t))
+        }
+        values.clear()
+        values.put(MediaStore.Downloads.IS_PENDING, 0)
+        resolver.update(uri, values, null, null)
+        return Result2.Ok(Export(uri = uri, filename = filename))
     }
 
     private fun newFilename(): String {

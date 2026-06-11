@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Event
@@ -103,7 +103,7 @@ private fun EventDetailContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             BhIconButton(
-                icon = Icons.Outlined.ArrowBack,
+                icon = Icons.AutoMirrored.Outlined.ArrowBack,
                 contentDescription = "Back",
                 onClick = onBack,
             )

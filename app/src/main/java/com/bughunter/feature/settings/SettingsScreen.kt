@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phonelink
 import androidx.compose.material.icons.outlined.Security
@@ -270,7 +268,7 @@ private fun SettingsContent(
         }
 
         Text(
-            text = "Bug Hunter for Android 2.9",
+            text = "Bug Hunter for Android 2.10",
             style = MaterialTheme.typography.labelSmall,
             color = tokens.textFaint,
         )

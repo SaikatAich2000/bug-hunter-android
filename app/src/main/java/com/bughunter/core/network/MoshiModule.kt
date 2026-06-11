@@ -106,16 +106,18 @@ internal object MoshiModule {
         .build()
 }
 
-private object LoginResponseAdapterFactory : JsonAdapter.Factory {
-    override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
-        if (Types.getRawType(type) != com.bughunter.core.network.dto.LoginResponse::class.java) return null
-        return com.bughunter.core.network.dto.LoginResponseAdapter(moshi)
+private val LoginResponseAdapterFactory = JsonAdapter.Factory { type, _, moshi ->
+    if (Types.getRawType(type) != com.bughunter.core.network.dto.LoginResponse::class.java) {
+        null
+    } else {
+        com.bughunter.core.network.dto.LoginResponseAdapter(moshi)
     }
 }
 
-private object ChatBlockAdapterFactory : JsonAdapter.Factory {
-    override fun create(type: Type, annotations: Set<Annotation>, moshi: Moshi): JsonAdapter<*>? {
-        if (Types.getRawType(type) != com.bughunter.core.network.dto.ChatBlock::class.java) return null
-        return com.bughunter.core.network.dto.ChatBlockAdapter(moshi)
+private val ChatBlockAdapterFactory = JsonAdapter.Factory { type, _, moshi ->
+    if (Types.getRawType(type) != com.bughunter.core.network.dto.ChatBlock::class.java) {
+        null
+    } else {
+        com.bughunter.core.network.dto.ChatBlockAdapter(moshi)
     }
 }

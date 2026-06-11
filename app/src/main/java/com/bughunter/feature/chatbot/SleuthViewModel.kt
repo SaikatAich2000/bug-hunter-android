@@ -181,7 +181,7 @@ internal class SleuthViewModel @Inject constructor(
         // Preserve any locally-seeded system messages (welcome banner) that are not in the repo log.
         val localOnly = current.turns
             .filter { it is ChatTurn.SystemSaid }
-            .filterNot { local -> converted.any { it is ChatTurn.SystemSaid && (it as ChatTurn.SystemSaid).text == (local as ChatTurn.SystemSaid).text } }
+            .filterNot { local -> converted.any { it is ChatTurn.SystemSaid && it.text == (local as ChatTurn.SystemSaid).text } }
         val merged = (localOnly + converted).sortedBy { it.createdAtEpochMs }
         val typing = converted.any { it is ChatTurn.BotTyping }
         val previousBotCount = current.turns.count { it is ChatTurn.BotSaid }

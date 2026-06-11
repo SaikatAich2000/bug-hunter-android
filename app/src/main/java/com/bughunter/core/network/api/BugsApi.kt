@@ -17,7 +17,6 @@ import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.HTTP
 import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST

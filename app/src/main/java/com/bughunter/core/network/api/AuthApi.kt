@@ -13,7 +13,6 @@ import com.bughunter.core.network.dto.ProfileUpdateIn
 import com.bughunter.core.network.dto.ResetPasswordIn
 import com.bughunter.core.network.dto.SignupIn
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
 import retrofit2.http.POST

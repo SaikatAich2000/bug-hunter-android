@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -82,7 +82,7 @@ internal fun BugDetailContent(
                 title = "Bug",
                 navigationIcon = {
                     BhIconButton(
-                        icon = Icons.Filled.ArrowBack,
+                        icon = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         onClick = onBack,
                     )
@@ -291,7 +291,6 @@ private fun CenteredLoader() {
 
 @Composable
 private fun ErrorPanel(error: DomainError, onRetry: () -> Unit) {
-    val tokens = LocalBrandTokens.current
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -2,6 +2,10 @@
 
 All notable changes to Bug Hunter Android. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2.10] — 2026-06-11
+
+Maintenance + quality pass: SonarQube cleanup and expanded test coverage.
+
 ## [2.8.0] — 2026-06-05
 
 Initial public release of the native Android client for Bug Hunter.

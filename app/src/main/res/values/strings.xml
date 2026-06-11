@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bug Hunter</string>
-    <string name="app_brand">Bug Hunter</string>
-    <string name="app_version_label">v2.9</string>
 
-    <string name="theme_mode_system">Match system</string>
-    <string name="theme_mode_light">Light</string>
-    <string name="theme_mode_dark">Dark</string>
 
     <!-- Notification channel labels — visible to the user under
          Settings → Apps → Bug Hunter → Notifications. Three channels
@@ -20,11 +15,5 @@
     <string name="fcm_channel_activity_desc">Status changes, new comments, and other updates on items you follow.</string>
     <string name="fcm_default_channel_id" translatable="false">bh_activity</string>
 
-    <string name="loading">Working…</string>
-    <string name="generic_error">Something went wrong.</string>
-    <string name="retry">Retry</string>
-    <string name="cancel">Cancel</string>
-    <string name="save">Save</string>
-    <string name="ok">OK</string>
 
 </resources>

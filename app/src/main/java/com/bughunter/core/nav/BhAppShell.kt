@@ -427,7 +427,7 @@ private fun BhBottomBar(
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        BhSidebarBottomBarItems().forEach { item ->
+        bhSidebarBottomBarItems().forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route.path,
                 onClick = { onNavigate(item.route) },
@@ -446,7 +446,7 @@ private fun BhNavigationRail(
     NavigationRail(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        BhSidebarBottomBarItems().forEach { item ->
+        bhSidebarBottomBarItems().forEach { item ->
             NavigationRailItem(
                 selected = currentRoute == item.route.path,
                 onClick = { onNavigate(item.route) },

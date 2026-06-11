@@ -37,7 +37,7 @@ internal class ResetPasswordViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         ResetPasswordUiState(
-            token = savedStateHandle.get<String>(BhRoute.ResetPassword.ARG_TOKEN).orEmpty(),
+            token = savedStateHandle[BhRoute.ResetPassword.ARG_TOKEN] ?: "",
         ),
     )
     val state: StateFlow<ResetPasswordUiState> = _state.asStateFlow()

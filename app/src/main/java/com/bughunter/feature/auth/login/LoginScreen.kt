@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,8 +26,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +42,8 @@ import com.bughunter.core.ui.components.BhTextField
 import com.bughunter.core.ui.theme.LocalAccentGradient
 import com.bughunter.core.ui.theme.LocalBrandTokens
 
-private const val APP_VERSION_LABEL = "Version 2.9"
+private const val APP_VERSION_LABEL = "Version 2.10"
+private const val BRAND_NAME = "Bug Hunter"
 
 @Composable
 internal fun LoginScreen(
@@ -132,7 +130,7 @@ private fun LoginContent(
 private fun BugHunterLogo(size: Int) {
     Image(
         painter = painterResource(id = R.drawable.ic_launcher_foreground),
-        contentDescription = "Bug Hunter",
+        contentDescription = BRAND_NAME,
         contentScale = ContentScale.Fit,
         modifier = Modifier.size(size.dp),
     )
@@ -152,7 +150,7 @@ private fun LoginBrandPanel() {
         BugHunterLogo(size = 132)
         Spacer(modifier = Modifier.height(24.dp))
         BhGradientText(
-            text = "Bug Hunter",
+            text = BRAND_NAME,
             brush = gradient,
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
@@ -191,7 +189,7 @@ private fun LoginFormPanel(
             BugHunterLogo(size = 96)
             Spacer(modifier = Modifier.height(12.dp))
             BhGradientText(
-                text = "Bug Hunter",
+                text = BRAND_NAME,
                 brush = gradient,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,

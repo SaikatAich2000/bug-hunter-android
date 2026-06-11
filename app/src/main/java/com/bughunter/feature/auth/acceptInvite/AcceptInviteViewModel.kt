@@ -42,7 +42,7 @@ internal class AcceptInviteViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         AcceptInviteUiState(
-            token = savedStateHandle.get<String>(BhRoute.AcceptInvite.ARG_TOKEN).orEmpty(),
+            token = savedStateHandle[BhRoute.AcceptInvite.ARG_TOKEN] ?: "",
         ),
     )
     val state: StateFlow<AcceptInviteUiState> = _state.asStateFlow()

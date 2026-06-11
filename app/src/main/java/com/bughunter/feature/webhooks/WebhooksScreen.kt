@@ -81,7 +81,6 @@ private fun WebhooksContent(
 ) {
     var creating by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<WebhookOut?>(null) }
-    val tokens = LocalBrandTokens.current
     Column(
         modifier = Modifier
             .fillMaxSize()

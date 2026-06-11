@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +31,6 @@ import com.bughunter.core.ui.components.BhGhostButton
 import com.bughunter.core.ui.components.BhIconButton
 import com.bughunter.core.ui.components.BhPrimaryButton
 import com.bughunter.core.ui.components.BhTextField
-import com.bughunter.core.ui.theme.LocalBrandTokens
 import com.bughunter.core.ui.util.UiState
 import com.bughunter.feature.events.create.EventFormDialog
 
@@ -87,7 +85,6 @@ private fun EventsListContent(
     onClearFilters: () -> Unit,
     onDismissForm: () -> Unit,
 ) {
-    val tokens = LocalBrandTokens.current
     Column(
         modifier = Modifier
             .fillMaxSize()

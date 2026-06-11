@@ -1,9 +1,7 @@
 package com.bughunter.core.nav
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,7 +23,7 @@ import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.ExitToApp
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Shield
@@ -42,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -175,7 +172,7 @@ private fun BhSidebarBrandRow(gradient: androidx.compose.ui.graphics.Brush) {
                 fontWeight = FontWeight.ExtraBold,
             )
             Text(
-                text = "v2.9",
+                text = "v2.10",
                 style = MaterialTheme.typography.labelSmall,
                 color = LocalBrandTokens.current.textFaint,
             )
@@ -309,7 +306,7 @@ private fun BhSidebarAccountCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.ExitToApp,
+                        imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
                         contentDescription = "Logout",
                         tint = tokens.textMuted,
                         modifier = Modifier.size(18.dp),
@@ -325,8 +322,7 @@ private fun BhSidebarAccountCard(
     }
 }
 
-@Composable
-internal fun BhSidebarBottomBarItems(): List<BhSidebarItem> = BottomBarDestinations
+internal fun bhSidebarBottomBarItems(): List<BhSidebarItem> = BottomBarDestinations
 
 // Reserve PaddingValues helper for consumers that want consistent inner padding.
 internal val BhSidebarContentPadding = PaddingValues(horizontal = 14.dp, vertical = 18.dp)

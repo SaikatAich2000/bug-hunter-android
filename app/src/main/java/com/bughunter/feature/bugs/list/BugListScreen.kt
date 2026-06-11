@@ -187,7 +187,7 @@ private fun BugListBody(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = if (tablet) 12.dp else 12.dp),
+                        .padding(horizontal = 12.dp),
                     contentPadding = PaddingValues(bottom = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {

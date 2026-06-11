@@ -75,7 +75,6 @@ private fun InvitationsContent(
     onInvite: (String, com.bughunter.core.network.dto.Role, List<Int>, Boolean) -> Unit,
     onRefresh: () -> Unit,
 ) {
-    val tokens = LocalBrandTokens.current
     var showInvite by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier

@@ -77,6 +77,40 @@ The app needs a running Bug Hunter backend. Configure the URL via the `bh.baseUr
 
 The backend API contract is mirrored in [`_design/api_catalog.md`](_design/api_catalog.md) and [`_design/schema_catalog.md`](_design/schema_catalog.md).
 
+## Code quality (SonarQube)
+
+Static analysis + coverage run through the `org.sonarqube` Gradle plugin
+(not the Docker `sonar-scanner-cli` the Python backends use — Gradle projects
+are analysed in-process). Coverage comes from **Kover**, whose JaCoCo-format
+XML SonarQube ingests.
+
+```bash
+# 1. Run the JVM unit suite + emit coverage XML
+JAVA_HOME=<jdk-17+> ./gradlew testDebugUnitTest koverXmlReportDebug
+
+# 2. Full analysis + upload (needs a SonarQube token)
+SONAR_TOKEN=sqp_xxxx ./scripts/sonar-scan.sh      # macOS/Linux
+#  .\scripts\sonar-scan.ps1                         # Windows PowerShell
+```
+
+The project key is **`Bug-Hunter-Android`**. Other helpers mirror the
+backends:
+
+| Script | Purpose |
+| --- | --- |
+| `scripts/sonar-scan.{ps1,sh}` | run tests + coverage, then `gradle sonar` |
+| `scripts/sonar-export.ps1` | pull open issues to `sonar-issues.{json,csv}` |
+| `scripts/sonar-mark-hotspots-safe.ps1` | bulk-mark reviewed hotspots SAFE |
+
+**Coverage scope.** Compose UI (`*Screen.kt`, `ui/components`, `ui/theme`,
+`core/nav`, charts, chat bubbles), the DI graph, and generated code are
+excluded from the coverage denominator in both the Kover report
+(`app/build.gradle.kts`) and `sonar.coverage.exclusions` (root
+`build.gradle.kts`) — they're exercised by instrumented (emulator) tests, not
+the JVM unit suite. The graded surface is the testable logic: ViewModels,
+repositories, interceptors, mappers, use-cases, and the `core/ui/util`
+validators/formatters/sanitizer.
+
 ## Contributing
 
 PRs welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first, run the test suite before opening a PR.

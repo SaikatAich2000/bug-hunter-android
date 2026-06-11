@@ -28,7 +28,7 @@ internal class EventDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val eventId: Int = checkNotNull(savedStateHandle.get<Int>("eventId")) {
+    private val eventId: Int = checkNotNull(savedStateHandle["eventId"]) {
         "eventId nav arg missing"
     }
 

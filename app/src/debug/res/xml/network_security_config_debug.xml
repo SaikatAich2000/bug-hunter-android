@@ -3,26 +3,30 @@
   Debug-only network security policy.
 
   Production release builds use the system default, which forbids
-  cleartext HTTP. This debug-only override allows cleartext to ANY
-  destination so contributors can point the app at either:
+  cleartext HTTP. This debug-only override permits cleartext, but ONLY
+  to the explicit local dev hosts listed below — never globally. Scoping
+  to <domain-config> (instead of a blanket <base-config>) keeps the
+  attack surface tiny: every other destination is still HTTPS-only even
+  in debug.
 
-    - http://10.0.2.2:8000              (Android emulator → host)
-    - http://localhost:8000              (via `adb reverse tcp:8000 ...`)
-    - http://<laptop-LAN-IP>:8000        (real phone on same WiFi)
-    - http://10.x.x.x:8000               (corporate LAN)
-    - http://192.168.x.x:8000            (home/office router)
-    - http://172.16-31.x.x:8000          (less common private range)
+  Hosts that work out of the box:
+    - http://10.0.2.2:8000   (Android emulator → host loopback)
+    - http://10.0.3.2:8000   (Genymotion emulator → host loopback)
+    - http://localhost:8000  (via `adb reverse tcp:8000 tcp:8000`)
+    - http://127.0.0.1:8000  (same, explicit loopback)
 
-  Enumerating every possible LAN address is impractical (every home
-  router has different DHCP defaults), so the simpler posture is "any
-  cleartext is fine in debug, no cleartext at all in release". The
-  release manifest does NOT reference this file, so the production APK
-  is unaffected.
+  Testing on a REAL device over your LAN? Add your laptop's IP as one
+  more <domain> entry below, e.g.:
+    <domain includeSubdomains="true">192.168.1.42</domain>
+
+  The release manifest does NOT reference this file, so the production
+  APK is unaffected.
 -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true">
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">10.0.3.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
 </network-security-config>
